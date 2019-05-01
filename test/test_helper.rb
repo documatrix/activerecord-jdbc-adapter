@@ -126,16 +126,14 @@ class Test::Unit::TestCase
 
   def with_connection(config)
     ActiveRecord::Base.establish_connection config
-    yield ActiveRecord::Base.connection
+    conn = ActiveRecord::Base.connection
+    yield conn
   ensure
-    ActiveRecord::Base.connection.disconnect!
+    conn&.disconnect!
   end
 
   def self.disconnect_if_connected
-    if ActiveRecord::Base.connected?
-      ActiveRecord::Base.connection.disconnect!
-      ActiveRecord::Base.remove_connection
-    end
+    ActiveRecord::Base.clear_all_connections!
   end
 
   def disconnect_if_connected; self.class.disconnect_if_connected end
@@ -488,12 +486,12 @@ module ActiveRecord
       @@ignored_sql = value || []
     end
 
-    # FIXME: this needs to be refactored so specific database can add their own
-    # ignored SQL.  This ignored SQL is for Oracle.
+    # FIXME: this needs to be refactored so specific database can add their own ignored SQL.
     ignored_sql.concat [/^select .*nextval/i,
       /^SAVEPOINT/,
       /^ROLLBACK TO/,
-      /^\s*select .* from all_triggers/im
+      /^\s*select .* from all_triggers/im,
+      /^\s*SELECT sql\b.*\bFROM sqlite_master/im
     ]
 
     @@log = []
@@ -505,7 +503,7 @@ module ActiveRecord
     end
 
     def call(name, start, finish, message_id, values)
-      return if 'CACHE' == values[:name]
+      return if values[:cached]
 
       sql = values[:sql]
       sql = sql.to_sql unless sql.is_a?(String)
