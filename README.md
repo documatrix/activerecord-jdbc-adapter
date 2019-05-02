@@ -17,6 +17,30 @@ gem 'activerecord-jdbc-alt-adapter', '~> 50.3.0'
 gem 'jdbc-mssql', '~> 0.6.0'
 ```
 
+then require the AR JDBC in your `application.rb` file, for example:
+
+```ruby
+require_relative 'boot'
+
+require 'rails/all'
+
+# Require the gems listed in Gemfile, including any gems
+# you've limited to :test, :development, or :production.
+Bundler.require(*Rails.groups)
+
+if RUBY_PLATFORM == 'java'
+  require 'arjdbc'
+end
+
+module Sam
+  class Application < Rails::Application
+    # Settings in config/environments/* take precedence over those specified here.
+    # Application configuration should go into files in config/initializers
+    # -- all .rb files in that directory are automatically loaded.
+
+  end
+end
+```
 
 ### Breaking changes
 
@@ -44,8 +68,9 @@ If you have slow queries on your background jobs and locking queries you can cha
 
 database config example (`database.yml`):
 
+
 ```yml
-# SQL Server (2012 or higher recommended)
+# SQL Server (2012 or higher)
 
 default: &default
   adapter: sqlserver
@@ -54,12 +79,27 @@ default: &default
 development:
   <<: *default
   host: localhost
-  database: jruby_development
-  username: dev
+  database: sam_development
+  username: SA
   password: password
   transaction_isolation: read_uncommitted
   lock_timeout: 10000
+
+test:
+  <<: *default
+  host: localhost
+  database: sam_test
+  username: SA
+  password: password
+
+production:
+  <<: *default
+  host: localhost
+  database: sam_production
+  username:
+  password:
 ```
+
 
 ### WARNING
 
