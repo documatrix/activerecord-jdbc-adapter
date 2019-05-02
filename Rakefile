@@ -21,8 +21,8 @@ task :default => :jar # RubyGems extention will do a bare `rake' e.g. :
 
 
 base_dir = Dir.pwd
-gem_name = 'activerecord-jdbc-adapter'
-gemspec_path = File.expand_path('activerecord-jdbc-adapter.gemspec', File.dirname(__FILE__))
+gem_name = 'activerecord-jdbc-alt-adapter'
+gemspec_path = File.expand_path('activerecord-jdbc-alt-adapter.gemspec', File.dirname(__FILE__))
 gemspec = lambda do
   @_gemspec_ ||= Dir.chdir(File.dirname(__FILE__)) do
     Gem::Specification.load(gemspec_path)
