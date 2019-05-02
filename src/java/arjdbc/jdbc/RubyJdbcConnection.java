@@ -1433,11 +1433,11 @@ public class RubyJdbcConnection extends RubyObject {
                     final DatabaseMetaData metaData = connection.getMetaData();
                     indexInfoSet = metaData.getIndexInfo(table.catalog, table.schema, table.name, false, true);
                     String currentIndex = null;
+                    RubyArray currentColumns = null;
 
                     while ( indexInfoSet.next() ) {
                         String indexName = indexInfoSet.getString(INDEX_INFO_NAME);
                         if ( indexName == null ) continue;
-                        RubyArray currentColumns = null;
 
                         indexName = caseConvertIdentifierForRails(metaData, indexName);
 
@@ -2688,7 +2688,9 @@ public class RubyJdbcConnection extends RubyObject {
 
         final IRubyObject type = attributeSQLType(context, attribute);
 
-        if ( type != context.nil ) return type.asJavaString();
+        if ( type != context.nil ) {
+            return mapTypeToString(type);
+        }
 
         final IRubyObject value = value_site.call(context, attribute, attribute);
 
@@ -2705,6 +2707,13 @@ public class RubyJdbcConnection extends RubyObject {
         }
 
         return "string";
+    }
+
+    // to be overriden in child class for database specific types
+    protected String mapTypeToString(final IRubyObject type) {
+      final String typeStr = type.asJavaString();
+
+      return typeStr;
     }
 
     protected final RubyTime timeInDefaultTimeZone(final ThreadContext context, final IRubyObject value) {
@@ -3193,6 +3202,7 @@ public class RubyJdbcConnection extends RubyObject {
     protected static final int DECIMAL_DIGITS = 9;
     protected static final int COLUMN_DEF = 13;
     protected static final int IS_NULLABLE = 18;
+    protected static final int BUFFER_LENGTH = 8;
 
     /**
      * Create a string which represents a SQL type usable by Rails from the
