@@ -60,7 +60,7 @@ desc "Releasing AR-JDBC gems (use NOOP=true to disable gem pushing)"
 task 'release:do' do
   ENV['RELEASE'] = 'true' # so that .gemspec is built with adapter_java.jar
   Rake::Task['build'].invoke
-  Rake::Task['build:adapters'].invoke
+  # Rake::Task['build:adapters'].invoke
 
   noop = ENV.key?('NOOP') && (ENV['NOOP'] != 'false' && ENV['NOOP'] != '')
 
