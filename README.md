@@ -1,3 +1,74 @@
+# ActiveRecord JDBC Alternative Adapter
+
+This adapter is a fork of the ActiveRecord JDBC Adapter with basic support for
+**SQL Server/Azure SQL** only, At this stage only works with JRuby on Rails 5.0
+and support for Rails 5.1 is planned in the near future. This adapter may work
+with other databases supported by the original adapter but it is advised to
+use the [original adapter](https://github.com/jruby/activerecord-jdbc-adapter)
+
+
+### How to use it:
+
+Add the following to your `Gemfile`:
+
+```
+gem 'activerecord-jdbc-alt-adapter', '~> 50.3.0'
+
+gem 'jdbc-mssql', '~> 0.6.0'
+```
+
+
+### Breaking changes
+
+- This adapter let SQL Server be SQL Server, it does not make SQL Server to be
+  more like MySQL or PostgreSQL, The query will just fails if SQL Server does not
+  support that SQL dialect.
+- This adapter uses the `datetime2` sql data type as the Rails logical `datetime` data type.
+- This adapter needs the mssql jdbc driver version 7.0.0  onwards to work properly,
+  therefore you can use the gem `jdbc-mssql` version `0.5.0` onwards or the actual
+  driver jar file  version `7.0.0`.
+
+
+### Recommendation
+
+In order to avoid deadlocks it is advised to use `SET READ_COMMITTED_SNAPSHOT ON`
+Make sure to run `ALTER DATABASE your_db SET READ_COMMITTED_SNAPSHOT ON` against
+your database.
+
+If you prefer to use the `READ_UNCOMMITED` transaction isolation level as your
+default isolation level, add the `transaction_isolation: 'read_uncommitted'` in
+your database config.
+
+If you have slow queries on your background jobs and locking queries you can change the default
+`lock_timeout` config, add the `lock_timeout: 10000` in your database config.
+
+database config example (`database.yml`):
+
+```yml
+# SQL Server (2012 or higher recommended)
+
+default: &default
+  adapter: sqlserver
+  encoding: utf8
+
+development:
+  <<: *default
+  host: localhost
+  database: jruby_development
+  username: dev
+  password: password
+  transaction_isolation: read_uncommitted
+  lock_timeout: 10000
+```
+
+### WARNING
+
+Keep one eye in the Rails connection pool, we have not thoroughly tested that
+part since we don't use the default Rails connection pool, other than that
+this adapter should just work.
+
+
+
 # ActiveRecord JDBC Adapter
 
 [![Gem Version](https://badge.fury.io/rb/activerecord-jdbc-adapter.svg)][7]
