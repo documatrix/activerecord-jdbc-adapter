@@ -180,7 +180,8 @@ module ActiveRecord
         # @private these cannot specify a limit
         NO_LIMIT_TYPES = %w(text binary boolean date)
 
-        def type_to_sql(type, limit = nil, precision = nil, scale = nil)
+        # Maps logical Rails types to MSSQL-specific data types.
+        def type_to_sql(type, limit: nil, precision: nil, scale: nil, **) # :nodoc:
           type_s = type.to_s
           # MSSQL's NVARCHAR(n | max) column supports either a number between 1 and
           # 4000, or the word "MAX", which corresponds to 2**30-1 UCS-2 characters.
@@ -280,7 +281,7 @@ module ActiveRecord
           end
           sql_alter = [
             "ALTER TABLE #{quoted_table}",
-            "ALTER COLUMN #{quoted_column} #{type_to_sql column.type, column.limit, column.precision, column.scale}",
+            "ALTER COLUMN #{quoted_column} #{type_to_sql(column.type, limit: column.limit, precision: column.precision, scale: column.scale)}",
             (' NOT NULL' unless null)
           ]
 
@@ -290,7 +291,7 @@ module ActiveRecord
         private
 
         def change_column_type(table_name, column_name, type, options = {})
-          sql = "ALTER TABLE #{quote_table_name(table_name)} ALTER COLUMN #{quote_column_name(column_name)} #{type_to_sql(type, options[:limit], options[:precision], options[:scale])}"
+          sql = "ALTER TABLE #{quote_table_name(table_name)} ALTER COLUMN #{quote_column_name(column_name)} #{type_to_sql(type, limit: options[:limit], precision: options[:precision], scale: options[:scale])}"
           sql << (options[:null] ? " NULL" : " NOT NULL") if options.has_key?(:null)
           result = execute(sql)
           result
