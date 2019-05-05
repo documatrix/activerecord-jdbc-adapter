@@ -5,7 +5,7 @@ module ActiveRecord
 
         NATIVE_DATABASE_TYPES = {
           # Logical Rails types to SQL Server types
-          primary_key:   'int NOT NULL IDENTITY(1,1) PRIMARY KEY',
+          primary_key:   'bigint NOT NULL IDENTITY(1,1) PRIMARY KEY',
           integer:       { name: 'int', limit: 4 },
           boolean:       { name: 'bit' },
           decimal:       { name: 'decimal' },
