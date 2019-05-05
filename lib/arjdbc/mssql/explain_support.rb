@@ -41,7 +41,7 @@ module ActiveRecord
 
           binds.each do |bind|
             value = quote(bind.value_for_database)
-            sql.sub!('?', value)
+            sql = sql.sub('?', value)
           end
 
           sql
