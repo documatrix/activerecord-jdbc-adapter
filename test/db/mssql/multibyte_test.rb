@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLMultibyteTest < Test::Unit::TestCase
-  class CreateMultibyteEntries < ActiveRecord::Migration
+  class CreateMultibyteEntries < ActiveRecord::Migration[4.2]
     def self.up
       create_table 'multibyte_entries', force: true do |t|
         t.column :title, :string, limit: 100

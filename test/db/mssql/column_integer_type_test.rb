@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
-  class CreateIntegerTypes < ActiveRecord::Migration
+  class CreateIntegerTypes < ActiveRecord::Migration[4.2]
     def self.up
       create_table 'testing_integers', force: true do |t|
         t.column :my_integer, :integer

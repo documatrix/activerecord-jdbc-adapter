@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
-  class CreateMiscTypes < ActiveRecord::Migration
+  class CreateMiscTypes < ActiveRecord::Migration[4.2]
     def self.up
       create_table 'testing_miscellaneous_types', force: true do |t|
         t.column :boolean, :boolean

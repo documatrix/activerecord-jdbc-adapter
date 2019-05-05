@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
-  class CreateBinaryTypes < ActiveRecord::Migration
+  class CreateBinaryTypes < ActiveRecord::Migration[4.2]
     def self.up
       create_table 'testing_binaries', force: true do |t|
         t.column :my_binary, :binary

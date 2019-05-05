@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnStringTypeTest < Test::Unit::TestCase
-  class CreateStringTypes < ActiveRecord::Migration
+  class CreateStringTypes < ActiveRecord::Migration[4.2]
     def self.up
       create_table 'testing_strings', force: true do |t|
         t.column :my_string, :string

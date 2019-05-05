@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
-  class CreateApproxNumericTypes < ActiveRecord::Migration
+  class CreateApproxNumericTypes < ActiveRecord::Migration[4.2]
     def self.up
       create_table 'approx_numeric_types', force: true do |t|
         t.column :my_real, :real

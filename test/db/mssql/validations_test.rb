@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLValidationTest < Test::Unit::TestCase
-  class CreateValidationTests < ActiveRecord::Migration
+  class CreateValidationTests < ActiveRecord::Migration[4.2]
     def self.up
       create_table :validation_tests do |t|
         t.string :name

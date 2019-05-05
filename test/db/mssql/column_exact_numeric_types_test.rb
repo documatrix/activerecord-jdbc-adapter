@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
-  class CreateExactNumericTypes < ActiveRecord::Migration
+  class CreateExactNumericTypes < ActiveRecord::Migration[4.2]
     def self.up
       create_table 'exact_numeric_types', force: true do |t|
         t.column :my_decimal, :decimal

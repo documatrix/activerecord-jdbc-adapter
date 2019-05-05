@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLExtensionsTest < Test::Unit::TestCase
-  class CreateAccounts < ActiveRecord::Migration
+  class CreateAccounts < ActiveRecord::Migration[4.2]
     def self.up
       create_table :accounts do |t|
         t.string :first_name

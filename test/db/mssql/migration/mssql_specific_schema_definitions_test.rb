@@ -3,7 +3,7 @@ require 'db/mssql'
 
 module MSSQLMigration
   class SpecificSchemaDefinitionsTest < Test::Unit::TestCase
-    class CreateSpecificSchemaDefinitions < ActiveRecord::Migration
+    class CreateSpecificSchemaDefinitions < ActiveRecord::Migration[4.2]
       def self.up
         create_table :mssql_specific_columms do |t|
           t.smalldatetime :my_smalldatetime
