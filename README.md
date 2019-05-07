@@ -11,36 +11,16 @@ use the [original adapter](https://github.com/jruby/activerecord-jdbc-adapter)
 
 Add the following to your `Gemfile`:
 
-```
-gem 'activerecord-jdbc-alt-adapter', '~> 50.3.0'
-
-gem 'jdbc-mssql', '~> 0.6.0'
-```
-
-then require the AR JDBC in your `application.rb` file, for example:
-
 ```ruby
-require_relative 'boot'
-
-require 'rails/all'
-
-# Require the gems listed in Gemfile, including any gems
-# you've limited to :test, :development, or :production.
-Bundler.require(*Rails.groups)
-
-if RUBY_PLATFORM == 'java'
-  require 'arjdbc'
-end
-
-module Sam
-  class Application < Rails::Application
-    # Settings in config/environments/* take precedence over those specified here.
-    # Application configuration should go into files in config/initializers
-    # -- all .rb files in that directory are automatically loaded.
-
-  end
+platforms :jruby do
+  # Use jdbc as the database for Active Record
+  gem 'activerecord-jdbc-alt-adapter', '~> 50.3.1', require: 'arjdbc'
+  gem 'jdbc-mssql', '~> 0.6.0'
 end
 ```
+
+Or look at the sample rails 5.0 app  [wombat](https://github.com/JesseChavez/wombat50)
+and see how is set up.
 
 ### Breaking changes
 
@@ -54,6 +34,16 @@ end
 
 
 ### Recommendation
+
+If you have the old sql server `datetime` data type for created_at and
+updated_at, you don't need to be upgraded straightaway to `datetime2`, the old data type
+(`datetime_basic`) will still work fine, just make you add to the time zone
+aware list.
+
+```ruby
+# time zone aware configuration.
+config.active_record.time_zone_aware_types = [:datetime, :datetime_basic]
+```
 
 In order to avoid deadlocks it is advised to use `SET READ_COMMITTED_SNAPSHOT ON`
 Make sure to run `ALTER DATABASE your_db SET READ_COMMITTED_SNAPSHOT ON` against
