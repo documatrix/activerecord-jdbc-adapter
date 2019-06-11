@@ -262,6 +262,8 @@ module ActiveRecord
           ActiveRecord::InvalidForeignKey.new(message)
         when /(String or binary data would be truncated)/i
           ActiveRecord::ValueTooLong.new(message)
+        when /Cannot insert the value NULL into column .* does not allow nulls/
+          ActiveRecord::NotNullViolation.new(message)
         else
           super
         end
