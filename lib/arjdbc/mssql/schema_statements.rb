@@ -41,17 +41,6 @@ module ActiveRecord
           NATIVE_DATABASE_TYPES
         end
 
-        # Returns an array of table names defined in the database.
-        def tables(name = nil)
-          if name
-            ActiveSupport::Deprecation.warn(<<-MSG.squish)
-              Passing arguments to #tables is deprecated without replacement.
-            MSG
-          end
-
-          @connection.tables(nil, name)
-        end
-
         # Returns an array of Column objects for the table specified by +table_name+.
         # See the concrete implementation for details on the expected parameter values.
         # NOTE: This is ready, all implemented in the java part of adapter,
@@ -60,22 +49,6 @@ module ActiveRecord
           @connection.columns(table_name)
         rescue => e
           raise translate_exception_class(e, nil)
-        end
-
-        # Returns an array of view names defined in the database.
-        # (to be implemented)
-        def views
-          []
-        end
-
-        def table_exists?(table_name)
-          ActiveSupport::Deprecation.warn(<<-MSG.squish)
-            #table_exists? currently checks both tables and views.
-            This behavior is deprecated and will be changed with Rails 5.1 to only check tables.
-            Use #data_source_exists? instead.
-          MSG
-
-          tables.include?(table_name.to_s)
         end
 
         # Returns an array of indexes for the given table.
@@ -289,6 +262,31 @@ module ActiveRecord
         end
 
         private
+
+        def data_source_sql(name = nil, type: nil)
+          scope = quoted_scope(name, type: type)
+          table_name = 'TABLE_NAME'
+
+          sql = "SELECT #{table_name}"
+          sql << ' FROM INFORMATION_SCHEMA.TABLES'
+          sql << ' WHERE TABLE_CATALOG = DB_NAME()'
+          sql << " AND TABLE_SCHEMA = #{quote(scope[:schema])}"
+          sql << " AND TABLE_NAME = #{quote(scope[:name])}" if scope[:name]
+          sql << " AND TABLE_TYPE = #{quote(scope[:type])}" if scope[:type]
+          sql << " ORDER BY #{table_name}"
+          sql
+        end
+
+        def quoted_scope(raw_name = nil, type: nil)
+          schema = ArJdbc::MSSQL::Utils.unqualify_table_schema(raw_name)
+          name = ArJdbc::MSSQL::Utils.unqualify_table_name(raw_name)
+
+          scope = {}
+          scope[:schema] = schema || 'dbo'
+          scope[:name] = name if name
+          scope[:type] = type if type
+          scope
+        end
 
         def change_column_type(table_name, column_name, type, options = {})
           sql = "ALTER TABLE #{quote_table_name(table_name)} ALTER COLUMN #{quote_column_name(column_name)} #{type_to_sql(type, limit: options[:limit], precision: options[:precision], scale: options[:scale])}"

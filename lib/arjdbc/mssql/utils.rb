@@ -41,6 +41,7 @@ module ArJdbc
       end
 
       def unqualify_table_name(table_name)
+        return if table_name.blank?
         remove_identifier_delimiters(table_name.to_s.split('.').last)
       end
 
