@@ -18,6 +18,7 @@ require 'arjdbc/mssql/types'
 require 'arjdbc/mssql/quoting'
 require 'arjdbc/mssql/schema_definitions'
 require 'arjdbc/mssql/schema_statements'
+require 'arjdbc/mssql/schema_dumper'
 require 'arjdbc/mssql/database_statements'
 require 'arjdbc/mssql/explain_support'
 require 'arjdbc/mssql/extensions'
@@ -51,6 +52,7 @@ module ActiveRecord
 
       include MSSQL::Quoting
       include MSSQL::SchemaStatements
+      include MSSQL::ColumnDumper
       include MSSQL::DatabaseStatements
       include MSSQL::ExplainSupport
 
