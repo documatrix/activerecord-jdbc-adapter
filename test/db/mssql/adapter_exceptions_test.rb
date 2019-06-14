@@ -7,9 +7,11 @@ class MSSQLExceptionsTest < Test::Unit::TestCase
       create_table :system_exceptions do |t|
         t.string :name, limit: 50
         t.text :notes
+        t.integer :level, null: false
 
         t.timestamps
       end
+
       create_table :exception_sources do |t|
         t.references :system_exception, foreign_key: true
         t.string :source_name, limit: 20
@@ -44,17 +46,34 @@ class MSSQLExceptionsTest < Test::Unit::TestCase
   end
 
   def test_uniqueness_violations_are_translated_to_specific_exception
-    SystemException.create!(name: 'uniqueness_violation')
+    SystemException.create!(name: 'uniqueness_violation', level: 1)
 
     error = assert_raises(ActiveRecord::RecordNotUnique) do
-      SystemException.create!(name: 'uniqueness_violation')
+      SystemException.create!(name: 'uniqueness_violation', level: 1)
+    end
+
+    assert_not_nil error.cause
+  end
+
+  def test_not_null_violations_are_translated_to_specific_exception
+    error = assert_raises(ActiveRecord::NotNullViolation) do
+      SystemException.create(name: 'this_is_null_exception')
+    end
+
+    assert_not_nil error.cause
+  end
+
+  def test_numeric_value_out_of_ranges_are_translated_to_specific_exception
+    error = assert_raises(ActiveRecord::RangeError) do
+      SystemException.connection.create(
+        "INSERT INTO system_exceptions(name, level) VALUES ('out_of_range', 9223372036854775808)")
     end
 
     assert_not_nil error.cause
   end
 
   def test_foreign_key_violations_are_translated_to_specific_exception
-    exception = SystemException.create!(name: 'foreign_key_violation')
+    exception = SystemException.create!(name: 'foreign_key_violation', level: 1)
     the_id = exception.id
     exception.destroy
 
@@ -68,7 +87,7 @@ class MSSQLExceptionsTest < Test::Unit::TestCase
   end
 
   def test_value_too_long_violations_are_translated_to_specific_exception
-    exception = SystemException.create!(name: 'value_too_long_violation')
+    exception = SystemException.create!(name: 'value_too_long_violation', level: 1)
 
     error = assert_raises(ActiveRecord::ValueTooLong) do
       ExceptionSource.create!(

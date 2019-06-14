@@ -241,9 +241,9 @@ module ActiveRecord
         end
       end
 
-      protected
+      private
 
-      def translate_exception(e, message)
+      def translate_exception(exception, message)
         case message
         when /(cannot insert duplicate key .* with unique index) | (violation of unique key constraint)/i
           RecordNotUnique.new(message)
@@ -255,6 +255,8 @@ module ActiveRecord
           ActiveRecord::ValueTooLong.new(message)
         when /Cannot insert the value NULL into column .* does not allow nulls/
           ActiveRecord::NotNullViolation.new(message)
+        when /Arithmetic overflow error converting expression/
+          ActiveRecord::RangeError.new(message)
         else
           super
         end
