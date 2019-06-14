@@ -8,12 +8,12 @@ module ActiveRecord
 
         class DateTime2 < ActiveRecord::Type::DateTime
           def type_cast_for_schema(value)
-            return "'#{value}'" if value.acts_like?(:string)
+            return %("#{value}") if value.acts_like?(:string)
 
             if value.usec > 0
-              "'#{value.to_s(:db)}.#{value.usec.to_s.remove(/0+$/)}'"
+              %("#{value.to_s(:db)}.#{value.usec.to_s.remove(/0+$/)}")
             else
-              "'#{value.to_s(:db)}'"
+              %("#{value.to_s(:db)}")
             end
           end
 
@@ -49,12 +49,12 @@ module ActiveRecord
           end
 
           def type_cast_for_schema(value)
-            return "'#{value}'" if value.acts_like?(:string)
+            return %("#{value}") if value.acts_like?(:string)
 
             if value.usec > 0
-              "'#{value.to_s(:db)}.#{value.usec.to_s.remove(/0+$/)}'"
+              %("#{value.to_s(:db)}.#{value.usec.to_s.remove(/0+$/)}")
             else
-              "'#{value.to_s(:db)}'"
+              %("#{value.to_s(:db)}")
             end
           end
 
@@ -95,12 +95,12 @@ module ActiveRecord
 
         class Time < ActiveRecord::Type::Time
           def type_cast_for_schema(value)
-            return "'#{value}'" if value.acts_like?(:string)
+            return %("#{value}") if value.acts_like?(:string)
 
             if value.usec > 0
-              "'#{value.to_s(:db)}.#{value.usec.to_s.remove(/0+$/)}'"
+              %("#{value.to_s(:db)}.#{value.usec.to_s.remove(/0+$/)}")
             else
-              "'#{value.to_s(:db)}'"
+              %("#{value.to_s(:db)}")
             end
           end
 

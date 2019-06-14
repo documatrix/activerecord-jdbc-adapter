@@ -186,9 +186,9 @@ class MSSQLColumnDateTimeTypesTest < Test::Unit::TestCase
     output = dump_table_schema('datetime_types')
 
     assert_match %r{t\.datetime_basic\s+"my_datetime"$}, output
-    assert_match %r{t\.datetime_basic\s+"my_datetime_one",\s+default: '2017-02-28 01:59:19.789',\s+null: false$}, output
+    assert_match %r{t\.datetime_basic\s+"my_datetime_one",\s+default: "2017-02-28 01:59:19.789",\s+null: false$}, output
     assert_match %r{t\.smalldatetime\s+"my_smalldatetime"$}, output
-    assert_match %r{t\.smalldatetime\s+"my_smalldatetime_one",\s+default: '2019-02-28 05:59:06',\s+null: false$}, output
+    assert_match %r{t\.smalldatetime\s+"my_smalldatetime_one",\s+default: "2019-02-28 05:59:06",\s+null: false$}, output
     assert_match %r{t\.datetime\s+"created_at",\s+null: false$}, output
     assert_match %r{t\.datetime\s+"updated_at",\s+null: false$}, output
   end

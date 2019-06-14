@@ -155,8 +155,8 @@ class MSSQLColumnDateTime2TypesTest < Test::Unit::TestCase
 
     assert_match %r{t\.datetime\s+"my_datetime"$}, output
     assert_match %r{t\.datetime\s+"my_datetime_alt",\s+precision: 0$}, output
-    assert_match %r{t\.datetime\s+"my_datetime_one",\s+precision: 3,\s+default: '2019-02-28 05:59:06.567',\s+null: false$}, output
-    assert_match %r{t\.datetime\s+"my_datetime_two",\s+precision: 6,\s+default: '2017-02-28 01:59:19.789567',\s+null: false$}, output
+    assert_match %r{t\.datetime\s+"my_datetime_one",\s+precision: 3,\s+default: "2019-02-28 05:59:06.567",\s+null: false$}, output
+    assert_match %r{t\.datetime\s+"my_datetime_two",\s+precision: 6,\s+default: "2017-02-28 01:59:19.789567",\s+null: false$}, output
   end
 
   private
