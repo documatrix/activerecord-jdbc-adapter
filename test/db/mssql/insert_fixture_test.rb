@@ -3,7 +3,7 @@ require 'db/mssql'
 require 'active_record/fixtures'
 
 class MSSQLInsertFixturesTest < Test::Unit::TestCase
-  class CreateFixtureEntries < ActiveRecord::Migration[4.2]
+  class CreateFixtureEntries < ActiveRecord::Migration[5.1]
     def self.up
       create_table :fixture_entries do |t|
         t.column :foreign_id, :integer

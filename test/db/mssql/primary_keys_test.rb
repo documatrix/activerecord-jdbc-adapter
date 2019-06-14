@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnPrimaryKeysTest < Test::Unit::TestCase
-  class CreatePrimaryKeysTests < ActiveRecord::Migration[4.2]
+  class CreatePrimaryKeysTests < ActiveRecord::Migration[5.1]
     def self.up
       create_table :primary_keys_tests, force: true, id: false do |t|
         t.string :custom_id

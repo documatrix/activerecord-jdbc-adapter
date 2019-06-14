@@ -3,7 +3,7 @@ require 'db/mssql'
 
 class MSSQLLimitOffsetTest < Test::Unit::TestCase
 
-  class CreateLegacyShips < ActiveRecord::Migration[4.2]
+  class CreateLegacyShips < ActiveRecord::Migration[5.1]
 
     def self.up
       create_table "legacy_ships", { :primary_key => :ShipKey } do |t|
@@ -23,7 +23,7 @@ class MSSQLLimitOffsetTest < Test::Unit::TestCase
     self.primary_key = "ShipKey"
   end
 
-  class CreateLongShips < ActiveRecord::Migration[4.2]
+  class CreateLongShips < ActiveRecord::Migration[5.1]
 
     def self.up
       create_table "long_ships", :force => true do |t|
@@ -43,7 +43,7 @@ class MSSQLLimitOffsetTest < Test::Unit::TestCase
     has_many :vikings
   end
 
-  class CreateVikings < ActiveRecord::Migration[4.2]
+  class CreateVikings < ActiveRecord::Migration[5.1]
 
     def self.up
       create_table "vikings", :force => true do |t|
@@ -64,7 +64,7 @@ class MSSQLLimitOffsetTest < Test::Unit::TestCase
     belongs_to :long_ship
   end
 
-  class CreateNoIdVikings < ActiveRecord::Migration[4.2]
+  class CreateNoIdVikings < ActiveRecord::Migration[5.1]
     def self.up
       create_table "no_id_vikings", :force => true do |t|
         t.string "name", :limit => 50, :default => "Sven"
