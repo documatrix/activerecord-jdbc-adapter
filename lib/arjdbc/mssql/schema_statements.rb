@@ -151,11 +151,10 @@ module ActiveRecord
         end
 
         # @private these cannot specify a limit
-        NO_LIMIT_TYPES = %w(text binary boolean date)
+        NO_LIMIT_TYPES = %i[text binary boolean date].freeze
 
         # Maps logical Rails types to MSSQL-specific data types.
         def type_to_sql(type, limit: nil, precision: nil, scale: nil, **) # :nodoc:
-          type_s = type.to_s
           # MSSQL's NVARCHAR(n | max) column supports either a number between 1 and
           # 4000, or the word "MAX", which corresponds to 2**30-1 UCS-2 characters.
           #
@@ -164,11 +163,14 @@ module ActiveRecord
           #
           # See: http://msdn.microsoft.com/en-us/library/ms186939.aspx
           #
-          if type_s == 'string' && limit == 1073741823
-            'NVARCHAR(MAX)'
-          elsif NO_LIMIT_TYPES.include?(type_s)
+          type = type.to_sym if type
+          native = native_database_types[type]
+
+          if type == :string && limit == 1_073_741_823
+            'nvarchar(max)'
+          elsif NO_LIMIT_TYPES.include?(type)
             super(type)
-          elsif type_s == 'integer' || type_s == 'int'
+          elsif %i[int integer].include?(type)
             if limit.nil? || limit == 4
               'int'
             elsif limit == 2
@@ -178,8 +180,22 @@ module ActiveRecord
             else
               'bigint'
             end
-          elsif type_s == 'uniqueidentifier'
-            type_s
+          elsif type == :uniqueidentifier
+            'uniqueidentifier'
+          elsif %i[datetime time].include?(type)
+            precision ||= 7
+            column_type_sql = (native.is_a?(Hash) ? native[:name] : native).dup
+            if (0..7).include?(precision)
+              column_type_sql << "(#{precision})"
+            else
+              raise(
+                ActiveRecordError,
+                "No #{native[:name]} type has precision of #{precision}. The " \
+                'allowed range of precision is from 0 to 7, even though the ' \
+                'sql type precision is 7 this adapter will persist up to 6 ' \
+                'precision only.'
+              )
+            end
           else
             super
           end
