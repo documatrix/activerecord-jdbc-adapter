@@ -99,6 +99,18 @@ module MSSQLMigration
       assert_equal "Tester", Entry.new.test_change_column_default_from_to
     end
 
+    def test_change_column_to_drop_default_with_null_false
+      add_column :entries, :contributor, :boolean, default: true, null: false
+      Entry.reset_column_information
+      assert Entry.new.contributor?
+
+      change_column :entries, :contributor, :boolean, default: nil, null: false
+      Entry.reset_column_information
+
+      assert_not Entry.new.contributor?
+      assert_nil Entry.new.contributor
+    end
+
     def test_change_column_null
       assert_nothing_raised do
         add_column :entries, :test_change_column_null_one, :string, null: false

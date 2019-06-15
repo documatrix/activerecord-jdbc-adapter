@@ -251,7 +251,13 @@ module ActiveRecord
           end
 
           change_column_type(table_name, column_name, type, options)
-          change_column_default(table_name, column_name, options[:default]) if options_include_default?(options)
+
+          if options_include_default?(options)
+            change_column_default(table_name, column_name, options[:default])
+          elsif options.key?(:default) && options[:null] == false
+            # Drop default constraint when null option is false
+            remove_default_constraint(table_name, column_name)
+          end
 
           # add any removed indexes back
           indexes.each do |index|
