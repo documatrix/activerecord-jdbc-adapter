@@ -26,6 +26,11 @@ module ActiveRecord
           super && column.identity?
         end
 
+        # def schema_collation(column)
+        #   return unless column.collation
+        #   column.collation if column.collation != collation
+        # end
+
       end
     end
   end

@@ -180,11 +180,17 @@ module ActiveRecord
       alias_method :current_schema=, :default_schema=
 
       # Overrides method in abstract adapter
+      # FIXME: This needs to be fixed the we find a way how to
+      # get the collation per column basis.
       def case_sensitive_comparison(table, attribute, column, value)
+        @global_db_collation ||= collation
+
         if value.nil?
           table[attribute].eq(value)
-        elsif value.acts_like?(:string)
+        elsif [:string, :text].include?(column.type) && @global_db_collation && !@global_db_collation.match(/_CS/)
           table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
+        # elsif value.acts_like?(:string)
+        #   table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
         else
           table[attribute].eq(Arel::Nodes::BindParam.new)
         end
