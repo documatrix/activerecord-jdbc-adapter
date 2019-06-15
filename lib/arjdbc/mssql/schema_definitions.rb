@@ -2,6 +2,14 @@ module ActiveRecord
   module ConnectionAdapters
     module MSSQL
       module ColumnMethods
+        def primary_key(name, type = :primary_key, **options)
+          if [:integer, :bigint].include?(type)
+            options[:is_identity] = true unless options.key?(:default)
+          end
+
+          super
+        end
+
         # datetime with seconds always zero (:00) and without fractional seconds
         def smalldatetime(*args, **options)
           args.each { |name| column(name, :smalldatetime, options) }
@@ -64,6 +72,15 @@ module ActiveRecord
 
       class TableDefinition < ActiveRecord::ConnectionAdapters::TableDefinition
         include ColumnMethods
+
+        def new_column_definition(name, type, **options)
+          case type
+          when :primary_key
+            options[:is_identity] = true
+          end
+
+          super
+        end
       end
 
       class Table < ActiveRecord::ConnectionAdapters::Table
