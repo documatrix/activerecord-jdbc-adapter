@@ -231,7 +231,11 @@ module ActiveRecord
           default = extract_new_default_value(default_or_changes)
           unless default.nil?
             column = columns(table_name).find { |c| c.name.to_s == column_name.to_s }
-            result = execute "ALTER TABLE #{quote_table_name(table_name)} ADD CONSTRAINT DF_#{table_name}_#{column_name} DEFAULT #{quote_default_expression(default, column)} FOR #{quote_column_name(column_name)}"
+            result = execute(
+              "ALTER TABLE #{quote_table_name(table_name)} " \
+              "ADD CONSTRAINT DF_#{table_name}_#{column_name} " \
+              "DEFAULT #{quote_default_expression(default, column)} FOR #{quote_column_name(column_name)}"
+            )
             result
           end
         end
@@ -247,7 +251,11 @@ module ActiveRecord
           end
 
           if !options[:null].nil? && options[:null] == false && !options[:default].nil?
-            execute "UPDATE #{quote_table_name(table_name)} SET #{quote_column_name(column_name)}=#{quote_default_expression(options[:default], column)} WHERE #{quote_column_name(column_name)} IS NULL"
+            execute(
+              "UPDATE #{quote_table_name(table_name)} SET " \
+              "#{quote_column_name(column_name)}=#{quote_default_expression(options[:default], column)} " \
+              "WHERE #{quote_column_name(column_name)} IS NULL"
+            )
           end
 
           change_column_type(table_name, column_name, type, options)
