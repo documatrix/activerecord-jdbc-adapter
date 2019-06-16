@@ -181,13 +181,12 @@ module ActiveRecord
 
       # Overrides method in abstract adapter
       # FIXME: This needs to be fixed the we find a way how to
-      # get the collation per column basis.
+      # get the collation per column basis. At the moment we only use
+      # the global database collation
       def case_sensitive_comparison(table, attribute, column, value)
-        @global_db_collation ||= collation
-
         if value.nil?
           table[attribute].eq(value)
-        elsif [:string, :text].include?(column.type) && @global_db_collation && !@global_db_collation.match(/_CS/)
+        elsif [:string, :text].include?(column.type) && collation && !collation.match(/_CS/)
           table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
         # elsif value.acts_like?(:string)
         #   table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))

@@ -69,7 +69,7 @@ module ActiveRecord
         end
 
         def collation
-          select_value "SELECT Collation = CAST(SERVERPROPERTY('Collation') AS NVARCHAR(128))"
+          @collation ||= select_value("SELECT Collation = CAST(SERVERPROPERTY('Collation') AS NVARCHAR(128))")
         end
 
         def current_database
