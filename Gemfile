@@ -49,6 +49,7 @@ group :test do
 
   gem 'bcrypt', '~> 3.1.11', require: false
   gem 'jdbc-mssql', '~> 0.6.0', require: nil
+  # gem 'pry-debugger-jruby', platform: :jruby
 end
 
 group :rails do

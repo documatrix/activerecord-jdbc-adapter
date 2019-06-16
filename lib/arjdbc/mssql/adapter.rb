@@ -100,6 +100,11 @@ module ActiveRecord
         true
       end
 
+      # Does this adapter support views?
+      def supports_views?
+        true
+      end
+
       # Overrides abstract method which always returns false
       def valid_type?(type)
         !native_database_types[type].nil?
