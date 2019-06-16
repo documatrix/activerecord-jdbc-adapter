@@ -8,6 +8,7 @@ require 'arel/visitors/sqlserver'
 require 'active_record/connection_adapters/abstract_adapter'
 
 require 'arjdbc/mssql/extensions/attribute_methods'
+require 'arjdbc/mssql/extensions/calculations'
 
 require 'arjdbc/abstract/core'
 require 'arjdbc/abstract/connection_management'
