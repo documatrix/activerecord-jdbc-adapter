@@ -1,10 +1,13 @@
 # currently sqlserver is the default driver
-
+# NOTE: to change you sqlserver password you can use
+#
+#   ALTER LOGIN [arjdbc] with PASSWORD = N'password'
+#
 MSSQL_CONFIG = {
   adapter:  'sqlserver',
   database: ENV['SQLDATABASE'] || 'arjdbc_test',
   username: ENV['SQLUSER'] || 'arjdbc',
-  password: ENV['SQLPASS'] || 'arjdbc',
+  password: ENV['SQLPASS'] || 'password',
   host:     ENV['SQLHOST'] || 'localhost'
 }
 

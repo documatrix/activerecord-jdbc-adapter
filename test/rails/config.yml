@@ -91,6 +91,9 @@ connections:
         <% java.util.logging.Logger.getLogger("org.postgresql").setLevel(java.util.logging.Level::OFF) rescue nil %>
     arunit:
       <<: *_setup
+    arunit_without_prepared_statements:
+      <<: *_setup
+      prepared_statements: false
     arunit2:
       <<: *_setup
 
@@ -122,8 +125,8 @@ connections:
       # and https://github.com/Microsoft/mssql-jdbc/issues/665
       <% require 'jdbc/mssql' if ENV['DRIVER'] =~ /sqlserver/i %>
       adapter:  sqlserver
-      password: arjdbc
       username: arjdbc
+      password: password
       # at the moment adapter works best with prepared statements true
       prepared_statements: true
     arunit:

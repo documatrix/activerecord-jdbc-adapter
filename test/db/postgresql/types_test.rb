@@ -253,7 +253,7 @@ _SQL
 
     text_array_type = PostgresqlArray.type_for_attribute('nicknames')
     assert_instance_of OID::Array, text_array_type
-    assert_instance_of ActiveModel::Type::Text, text_array_type.subtype
+    assert_instance_of ActiveRecord::Type::Text, text_array_type.subtype
   end
 
   def test_data_type_of_range_types
@@ -319,7 +319,7 @@ _SQL
   end
 
   def test_data_type_of_oid_types
-    assert_instance_of ActiveModel::Type::Integer, PostgresqlOid.type_for_attribute('obj_id')
+    assert_instance_of OID::Oid, PostgresqlOid.type_for_attribute('obj_id')
   end
 
   def test_data_type_of_uuid_types

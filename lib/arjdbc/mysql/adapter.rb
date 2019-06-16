@@ -61,6 +61,10 @@ module ActiveRecord
         true
       end
 
+      def supports_transaction_isolation?
+        true
+      end
+
       # HELPER METHODS ===========================================
 
       # Reloading the type map in abstract/statement_cache.rb blows up postgres
@@ -92,7 +96,14 @@ module ActiveRecord
 
       #--
       # QUOTING ==================================================
-      #++
+      #+
+
+      # FIXME: 5.1 crashes without this.  I think this is Arel hitting a fallback path in to_sql.rb.
+      # So maybe an untested code path in their source.  Still means we are doing something wrong to
+      # even hit it.
+      def quote(value, comment=nil)
+        super(value)
+      end
 
       # NOTE: quote_string(string) provided by ArJdbc::MySQL (native code),
       # this piece is also native (mysql2) under MRI: `@connection.escape(string)`

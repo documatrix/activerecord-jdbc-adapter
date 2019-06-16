@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLIdentityInsertTest < Test::Unit::TestCase
-  class CreateIdentityInsertEntries < ActiveRecord::Migration
+  class CreateIdentityInsertEntries < ActiveRecord::Migration[5.1]
     def self.up
       create_table 'insert_entries', force: true do |t|
         t.column :title, :string, limit: 100

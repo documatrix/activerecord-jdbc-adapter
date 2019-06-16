@@ -27,6 +27,7 @@ package arjdbc.postgresql;
 
 import arjdbc.jdbc.Callable;
 import arjdbc.jdbc.DriverWrapper;
+import arjdbc.postgresql.PostgreSQLResult;
 import arjdbc.util.DateTimeUtils;
 import arjdbc.util.StringHelper;
 

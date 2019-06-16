@@ -7,6 +7,7 @@ require 'active_record/connection_adapters/postgresql/column'
 require 'active_record/connection_adapters/postgresql/explain_pretty_printer'
 require 'active_record/connection_adapters/postgresql/quoting'
 require 'active_record/connection_adapters/postgresql/referential_integrity'
+require 'active_record/connection_adapters/postgresql/schema_creation'
 require 'active_record/connection_adapters/postgresql/schema_dumper'
 require 'active_record/connection_adapters/postgresql/schema_statements'
 require 'active_record/connection_adapters/postgresql/type_metadata'
@@ -146,8 +147,7 @@ module ArJdbc
     ActiveRecordError = ::ActiveRecord::ActiveRecordError
 
     NATIVE_DATABASE_TYPES = {
-      bigserial:    'bigserial',
-      primary_key:  'serial primary key',
+      primary_key:  'bigserial primary key',
       bigint:       { name: 'bigint' },
       binary:       { name: 'bytea' },
       bit:          { name: 'bit' },
@@ -178,10 +178,10 @@ module ArJdbc
       money:        { name: 'money' },
       numeric:      { name: 'numeric' },
       numrange:     { name: 'numrange' },
+      oid:          { name: 'oid' },
       path:         { name: 'path' },
       point:        { name: 'point' },
       polygon:      { name: 'polygon' },
-      serial:       { name: 'serial' }, # auto-inc integer, bigserial, smallserial
       string:       { name: 'character varying' },
       text:         { name: 'text' },
       time:         { name: 'time' },
@@ -249,15 +249,11 @@ module ArJdbc
 
     def supports_index_sort_order?; true end
 
-    def supports_migrations?; true end
-
     def supports_partial_index?; true end
-
-    def supports_primary_key?; true end # Supports finding primary key on non-Active Record tables
 
     def supports_savepoints?; true end
 
-    def supports_transaction_isolation?(level = nil); true end
+    def supports_transaction_isolation?; true end
 
     def supports_views?; true end
 
@@ -287,6 +283,10 @@ module ArJdbc
       postgresql_version >= 80200
     end
 
+    def supports_pgcrypto_uuid?
+      postgresql_version >= 90400
+    end
+
     # Range data-types weren't introduced until PostgreSQL 9.2.
     def supports_ranges?
       postgresql_version >= 90200
@@ -294,6 +294,11 @@ module ArJdbc
 
     def supports_extensions?
       postgresql_version >= 90200
+    end
+
+    # From AR 5.1 postgres_adapter.rb
+    def default_index_type?(index) # :nodoc:
+      index.using == :btree || super
     end
 
     def enable_extension(name)
@@ -347,7 +352,7 @@ module ArJdbc
       select_value("SELECT pg_advisory_unlock(#{lock_id})")
     end
 
-    # Returns the configured supported identifier length supported by PostgreSQL
+    # Returns the max identifier length supported by PostgreSQL
     def max_identifier_length
       @max_identifier_length ||= select_one('SHOW max_identifier_length', 'SCHEMA'.freeze)['max_identifier_length'].to_i
     end
@@ -395,7 +400,8 @@ module ArJdbc
     # 'DISCARD ALL' fails if we are inside a transaction
     def clear_cache!
       super
-      @connection.execute 'DEALLOCATE ALL' if supports_statement_cache? && @connection.active?
+      # Make sure all query plans are *really* gone
+      @connection.execute 'DEALLOCATE ALL' if active?
     end
 
     def reset!
@@ -511,7 +517,7 @@ module ArJdbc
                col_description(a.attrelid, a.attnum) AS comment
           FROM pg_attribute a
           LEFT JOIN pg_attrdef d ON a.attrelid = d.adrelid AND a.attnum = d.adnum
-         WHERE a.attrelid = '#{quote_table_name(table_name)}'::regclass
+         WHERE a.attrelid = #{quote(quote_table_name(table_name))}::regclass
            AND a.attnum > 0 AND NOT a.attisdropped
          ORDER BY a.attnum
       end_sql
@@ -556,13 +562,24 @@ module ArJdbc
     end
 
     def translate_exception(exception, message)
+      return super unless exception.is_a?(ActiveRecord::JDBCError)
+
+      # TODO: Can we base these on an error code of some kind?
       case exception.message
       when /duplicate key value violates unique constraint/
         ::ActiveRecord::RecordNotUnique.new(message)
+      when /violates not-null constraint/
+        ::ActiveRecord::NotNullViolation.new(message)
       when /violates foreign key constraint/
         ::ActiveRecord::InvalidForeignKey.new(message)
       when /value too long/
         ::ActiveRecord::ValueTooLong.new(message)
+      when /out of range/
+        ::ActiveRecord::RangeError.new(message)
+      when /could not serialize/
+        ::ActiveRecord::SerializationFailure.new(message)
+      when /deadlock detected/
+        ::ActiveRecord::Deadlocked.new(message)
       else
         super
       end
@@ -637,6 +654,7 @@ module ActiveRecord::ConnectionAdapters
     def initialize(connection, logger = nil, connection_parameters = nil, config = {})
       # @local_tz is initialized as nil to avoid warnings when connect tries to use it
       @local_tz = nil
+      @max_identifier_length = nil
 
       super(connection, logger, config) # configure_connection happens in super
 
@@ -652,7 +670,6 @@ module ActiveRecord::ConnectionAdapters
 
     require 'active_record/connection_adapters/postgresql/schema_definitions'
 
-    ColumnDefinition = ActiveRecord::ConnectionAdapters::PostgreSQL::ColumnDefinition
     ColumnMethods = ActiveRecord::ConnectionAdapters::PostgreSQL::ColumnMethods
     TableDefinition = ActiveRecord::ConnectionAdapters::PostgreSQL::TableDefinition
     Table = ActiveRecord::ConnectionAdapters::PostgreSQL::Table

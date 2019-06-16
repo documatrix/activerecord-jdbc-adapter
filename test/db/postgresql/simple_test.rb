@@ -347,6 +347,6 @@ class PostgresForeignKeyTest < Test::Unit::TestCase
     assert_equal 1, connection.foreign_keys('db_posts').size
     assert_equal 'db_posts', connection.foreign_keys('db_posts')[0].from_table
     assert_equal 'db_types', connection.foreign_keys('db_posts')[0].to_table
-  end if ar_version('4.2')
+  end
 
 end

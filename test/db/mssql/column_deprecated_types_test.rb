@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 
 class MSSQLColumnDeprecatedTypeTest < Test::Unit::TestCase
-  class CreateDeprecatedTypes < ActiveRecord::Migration
+  class CreateDeprecatedTypes < ActiveRecord::Migration[5.1]
     def self.up
       create_table 'deprecated_types', force: true do |t|
         t.column :my_text, :text_basic

@@ -15,6 +15,18 @@ module ActiveRecord
           end
         end
 
+        def add_column_options!(sql, options)
+          sql << " DEFAULT #{quote_default_expression(options[:default], options[:column])}" if options_include_default?(options)
+
+          sql << ' NOT NULL' if options[:null] == false
+
+          sql << ' IDENTITY(1,1)' if options[:is_identity] == true
+
+          sql << ' PRIMARY KEY' if options[:primary_key] == true
+
+          sql
+        end
+
         # There is no RESTRICT in MSSQL but it has NO ACTION which behave
         # same as RESTRICT, added this behave according rails api.
         def action_sql(action, dependency)

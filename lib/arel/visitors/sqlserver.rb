@@ -99,17 +99,29 @@ module Arel
           collector = visit_Arel_Nodes_SelectStatement_SQLServer_Lock collector
         end
         if o.right.any?
-          collector << " " if o.left
+          collector << SPACE if o.left
           collector = inject_join o.right, collector, ' '
         end
         collector
+      end
+
+      def visit_Arel_Nodes_InnerJoin o, collector
+        collector << "INNER JOIN "
+        collector = visit o.left, collector
+        collector = visit_Arel_Nodes_SelectStatement_SQLServer_Lock collector, space: true
+        if o.right
+          collector << SPACE
+          visit(o.right, collector)
+        else
+          collector
+        end
       end
 
       def visit_Arel_Nodes_OuterJoin o, collector
         collector << "LEFT OUTER JOIN "
         collector = visit o.left, collector
         collector = visit_Arel_Nodes_SelectStatement_SQLServer_Lock collector, space: true
-        collector << " "
+        collector << SPACE
         visit o.right, collector
       end
 
@@ -199,7 +211,9 @@ module Arel
 
       def primary_Key_From_Table t
         return unless t
-        column_name = schema_cache.primary_keys(t.name) || column_cache(t.name).first.try(:second).try(:name)
+        # column_name = schema_cache.primary_keys(t.name) || column_cache(t.name).first.try(:second).try(:name)
+        column_name = @connection.schema_cache.primary_keys(t.name) ||
+          @connection.schema_cache.columns_hash(t.name).first.try(:second).try(:name)
         column_name ? t[column_name] : nil
       end
 

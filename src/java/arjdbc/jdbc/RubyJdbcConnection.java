@@ -2694,16 +2694,20 @@ public class RubyJdbcConnection extends RubyObject {
 
         final IRubyObject value = value_site.call(context, attribute, attribute);
 
-        if ( value instanceof RubyInteger ) {
+        if (value instanceof RubyInteger) {
             return "integer";
         }
 
-        if ( value instanceof RubyNumeric ) {
+        if (value instanceof RubyNumeric) {
             return "float";
         }
 
-        if ( value instanceof RubyTime ) {
+        if (value instanceof RubyTime) {
             return "timestamp";
+        }
+
+        if (value instanceof RubyBoolean) {
+            return "boolean";
         }
 
         return "string";

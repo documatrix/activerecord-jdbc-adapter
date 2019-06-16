@@ -4,7 +4,7 @@ module ChangeColumnTestMethods
 
   class Person < ActiveRecord::Base; end
 
-  class CreatePeopleTable < ActiveRecord::Migration
+  class CreatePeopleTable < ActiveRecord::Migration[4.2]
     def self.up
       create_table(:people) { |t| t.string :name; t.integer :phone }
     end
@@ -46,12 +46,6 @@ module ChangeColumnTestMethods
 
     p = Person.create! :name => 'Katka'
     assert_equal 'bar@example.com', p.email
-  end
-
-  def test_should_set_non_null_restriction
-    ActiveRecord::Migration.change_column :people, :phone, :string, :null => false
-    Person.reset_column_information
-    assert_raise(ActiveRecord::StatementInvalid) { Person.create! }
   end
 
   def test_should_set_null_restriction_with_default

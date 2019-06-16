@@ -47,6 +47,8 @@ module ArJdbc
       end
 
       def translate_exception(e, message)
+        # override in derived class
+
         # we shall not translate native "Java" exceptions as they might
         # swallow an ArJdbc / driver bug into an AR::StatementInvalid !
         return e if e.is_a?(Java::JavaLang::Throwable)

@@ -7,6 +7,9 @@ require 'arel/visitors/bind_visitor'
 require 'arel/visitors/sqlserver'
 require 'active_record/connection_adapters/abstract_adapter'
 
+require 'arjdbc/mssql/extensions/attribute_methods'
+require 'arjdbc/mssql/extensions/calculations'
+
 require 'arjdbc/abstract/core'
 require 'arjdbc/abstract/connection_management'
 require 'arjdbc/abstract/database_statements'
@@ -18,9 +21,9 @@ require 'arjdbc/mssql/types'
 require 'arjdbc/mssql/quoting'
 require 'arjdbc/mssql/schema_definitions'
 require 'arjdbc/mssql/schema_statements'
+require 'arjdbc/mssql/schema_dumper'
 require 'arjdbc/mssql/database_statements'
 require 'arjdbc/mssql/explain_support'
-require 'arjdbc/mssql/extensions'
 require 'arjdbc/mssql/transaction'
 require 'arjdbc/mssql/errors'
 require 'arjdbc/mssql/schema_creation'
@@ -51,6 +54,7 @@ module ActiveRecord
 
       include MSSQL::Quoting
       include MSSQL::SchemaStatements
+      include MSSQL::ColumnDumper
       include MSSQL::DatabaseStatements
       include MSSQL::ExplainSupport
 
@@ -81,19 +85,8 @@ module ActiveRecord
         ::ActiveRecord::ConnectionAdapters::MSSQLColumn
       end
 
-      # Can this adapter determine the primary key for tables not attached
-      # to an Active Record class, such as join tables?
-      def supports_primary_key?
-        true
-      end
-
       # Does this adapter support creating foreign key constraints?
       def supports_foreign_keys?
-        true
-      end
-
-      # Does this adapter support migrations?
-      def supports_migrations?
         true
       end
 
@@ -104,6 +97,11 @@ module ActiveRecord
 
       # The MSSQL datetime type doe have precision.
       def supports_datetime_with_precision?
+        true
+      end
+
+      # Does this adapter support views?
+      def supports_views?
         true
       end
 
@@ -188,11 +186,16 @@ module ActiveRecord
       alias_method :current_schema=, :default_schema=
 
       # Overrides method in abstract adapter
+      # FIXME: This needs to be fixed the we find a way how to
+      # get the collation per column basis. At the moment we only use
+      # the global database collation
       def case_sensitive_comparison(table, attribute, column, value)
         if value.nil?
           table[attribute].eq(value)
-        elsif value.acts_like?(:string)
+        elsif [:string, :text].include?(column.type) && collation && !collation.match(/_CS/)
           table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
+        # elsif value.acts_like?(:string)
+        #   table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
         else
           table[attribute].eq(Arel::Nodes::BindParam.new)
         end
@@ -250,9 +253,9 @@ module ActiveRecord
         end
       end
 
-      protected
+      private
 
-      def translate_exception(e, message)
+      def translate_exception(exception, message)
         case message
         when /(cannot insert duplicate key .* with unique index) | (violation of unique key constraint)/i
           RecordNotUnique.new(message)
@@ -262,6 +265,10 @@ module ActiveRecord
           ActiveRecord::InvalidForeignKey.new(message)
         when /(String or binary data would be truncated)/i
           ActiveRecord::ValueTooLong.new(message)
+        when /Cannot insert the value NULL into column .* does not allow nulls/
+          ActiveRecord::NotNullViolation.new(message)
+        when /Arithmetic overflow error converting expression/
+          ActiveRecord::RangeError.new(message)
         else
           super
         end

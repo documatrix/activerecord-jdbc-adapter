@@ -22,7 +22,7 @@ ArJdbc::ConnectionMethods.module_eval do
         raise
       end
     end
-
+    
     database = config[:database] # NOTE: "jdbc:sqlite::memory:" syntax is supported
     config[:url] ||= "jdbc:sqlite:#{database == ':memory:' ? '' : database}"
     config[:connection_alive_sql] ||= 'SELECT 1'

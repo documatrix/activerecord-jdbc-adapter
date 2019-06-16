@@ -48,8 +48,8 @@ group :test do
   gem 'mocha', '~> 1.2', require: false # Rails has '~> 0.14'
 
   gem 'bcrypt', '~> 3.1.11', require: false
-  gem 'builder', require: false
   gem 'jdbc-mssql', '~> 0.6.0', require: nil
+  # gem 'pry-debugger-jruby', platform: :jruby
 end
 
 group :rails do
@@ -61,6 +61,9 @@ group :rails do
 
     gem 'benchmark-ips', require: nil
   end
+
+  # AR expects this for testing xml in postgres (maybe others?)
+  gem 'builder', require: nil
 
   gem 'erubis', require: nil # "~> 2.7.0"
   # NOTE: due rails/activerecord/test/cases/connection_management_test.rb
