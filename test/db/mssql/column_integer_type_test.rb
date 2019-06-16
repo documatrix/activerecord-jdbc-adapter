@@ -4,14 +4,13 @@ require 'db/mssql'
 class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
   class CreateIntegerTypes < ActiveRecord::Migration[5.1]
     def self.up
-      create_table 'testing_integers', force: true do |t|
+      create_table 'testing_integers', id: :integer, force: true do |t|
         t.column :my_integer, :integer
         t.column :my_tinyint, :integer, limit: 1
         t.column :my_smallint, :integer, limit: 2
       end
 
-      create_table 'testing_big_integers', id: false do |t|
-        t.column :id, 'bigint NOT NULL IDENTITY(1,1) PRIMARY KEY'
+      create_table 'testing_big_integers' do |t|
         t.column :my_bigint, :bigint
         t.column :my_bigint_alt, :integer, limit: 8
       end
