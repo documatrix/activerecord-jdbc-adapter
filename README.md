@@ -1,10 +1,17 @@
 # ActiveRecord JDBC Alternative Adapter
 
 This adapter is a fork of the ActiveRecord JDBC Adapter with basic support for
-**SQL Server/Azure SQL** only, At this stage only works with JRuby on Rails 5.0
-and support for Rails 5.1 is planned in the near future. This adapter may work
-with other databases supported by the original adapter but it is advised to
-use the [original adapter](https://github.com/jruby/activerecord-jdbc-adapter)
+**SQL Server/Azure SQL**. This adapter may work with other databases
+supported by the original adapter such as PostgreSQL but it is advised to
+use the [original adapter](https://github.com/jruby/active)
+
+This adapter only works with JRuby and it is advised to install the latest
+stable versins of Rails
+
+- For Rails `5.0.7.2` install the `50.3.1` version of this adapter
+- For Rails `5.1.7` install the `51.3.0` version of this adapter
+
+Support for Rails 5.2 is planned in the near future.
 
 
 ### How to use it:
@@ -29,16 +36,17 @@ and see how is set up.
   support that SQL dialect.
 - This adapter uses the `datetime2` sql data type as the Rails logical `datetime` data type.
 - This adapter needs the mssql jdbc driver version 7.0.0  onwards to work properly,
-  therefore you can use the gem `jdbc-mssql` version `0.5.0` onwards or the actual
+  therefore you can use the gem `jdbc-mssql` version `0.6.0` onwards or the actual
   driver jar file  version `7.0.0`.
 
 
 ### Recommendation
 
-If you have the old sql server `datetime` data type for created_at and
-updated_at, you don't need to be upgraded straightaway to `datetime2`, the old data type
-(`datetime_basic`) will still work fine, just make you add to the time zone
-aware list.
+If you have the old sql server `datetime` data type for `created_at` and
+`updated_at`, you don't need to upgrade straightaway to `datetime2`, the old data type
+(`datetime_basic`) will still work for simple updates, just make you add to the time zone
+aware list. If you have complex `datetime` queries it is advised to upgrade to
+`datetime2`
 
 ```ruby
 # time zone aware configuration.
