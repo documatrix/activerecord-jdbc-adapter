@@ -125,8 +125,8 @@ connections:
       # and https://github.com/Microsoft/mssql-jdbc/issues/665
       <% require 'jdbc/mssql' if ENV['DRIVER'] =~ /sqlserver/i %>
       adapter:  sqlserver
-      password: arjdbc
       username: arjdbc
+      password: password
       # at the moment adapter works best with prepared statements true
       prepared_statements: true
     arunit:
