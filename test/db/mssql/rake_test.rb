@@ -46,13 +46,13 @@ class MSSQLRakeDbCreateTest < Test::Unit::TestCase
   test 'rake db:test:purge' do
     # Rake::Task["db:create"].invoke
     create_rake_test_database do |connection|
-      connection.create_table('users') { |t| t.string :name }
+      connection.create_table('rake_users') { |t| t.string :name }
     end
 
     Rake::Task["db:test:purge"].invoke
 
     ActiveRecord::Base.establish_connection db_config.merge :database => db_name
-    assert_false ActiveRecord::Base.connection.table_exists?('users')
+    assert_false ActiveRecord::Base.connection.table_exists?('rake_users')
     ActiveRecord::Base.connection.disconnect!
   end
 
@@ -61,7 +61,7 @@ class MSSQLRakeDbCreateTest < Test::Unit::TestCase
     # Rake::Task["db:create"].invoke
     create_rake_test_database do |connection|
       create_schema_migrations_table(connection)
-      connection.create_table('users') { |t| t.string :name; t.timestamps }
+      connection.create_table('rake_users') { |t| t.string :name; t.timestamps }
     end
 
     structure_sql = File.join('db', structure_sql_filename)
@@ -70,8 +70,8 @@ class MSSQLRakeDbCreateTest < Test::Unit::TestCase
       Rake::Task["db:structure:dump"].invoke
 
       assert File.exists?(structure_sql)
-      # CREATE TABLE [dbo].[users]( ... )
-      assert_match(/CREATE TABLE .*?\[users\]/i, File.read(structure_sql))
+      # CREATE TABLE [dbo].[rake_users]( ... )
+      assert_match(/CREATE TABLE .*?\[rake_users\]/i, File.read(structure_sql))
 
       # db:structure:load
       drop_rake_test_database(:silence)
@@ -79,7 +79,7 @@ class MSSQLRakeDbCreateTest < Test::Unit::TestCase
       Rake::Task["db:structure:load"].invoke
 
       ActiveRecord::Base.establish_connection db_config.merge :database => db_name
-      assert ActiveRecord::Base.connection.table_exists?('users')
+      assert ActiveRecord::Base.connection.table_exists?('rake_users')
       ActiveRecord::Base.connection.disconnect!
     ensure
       File.delete(structure_sql) if File.exists?(structure_sql)
