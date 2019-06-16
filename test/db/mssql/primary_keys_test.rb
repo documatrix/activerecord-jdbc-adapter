@@ -50,7 +50,7 @@ class MSSQLColumnPrimaryKeysTest < Test::Unit::TestCase
     conn = ActiveRecord::Base.connection
     conn.create_table(:bigint_defaults, id: :bigint, default: nil, force: true)
     schema = dump_table_schema 'bigint_defaults'
-    binding.pry
+
     assert_match %r{create_table "bigint_defaults", id: :bigint, default: nil}, schema
   end
 

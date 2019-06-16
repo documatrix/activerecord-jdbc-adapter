@@ -186,6 +186,7 @@ class MSSQLLimitOffsetTest < Test::Unit::TestCase
   end
 
   def test_limit_with_group_by
+    skip "Not supported  by the current sqlserver arel visitor"
     # TODO: simply out-of-order - group.limit not supported !
     %w( one two three four five six seven eight ).each do |name|
       LongShip.create!(:name => name)
@@ -216,6 +217,7 @@ class MSSQLLimitOffsetTest < Test::Unit::TestCase
 #  end if ar_version('3.0')
 
   def test_limit_with_group_by_and_aggregate_in_order_clause
+    skip "Not supported  by the current sqlserver arel visitor"
     %w( one two three four five six seven eight ).each_with_index do |name, i|
       LongShip.create!(:name => name, :width => (i+1)*10)
     end
