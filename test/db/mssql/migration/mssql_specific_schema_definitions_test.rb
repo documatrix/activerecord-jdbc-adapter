@@ -51,10 +51,10 @@ module MSSQLMigration
       assert_match %r{t\.smallmoney\s+"my_smallmoney",\s+precision: 10,\s+scale: 4$}, output
       assert_match %r{t\.char\s+"my_char",\s+limit: 1$}, output
       assert_match %r{t\.varchar\s+"my_varchar"$}, output
-      assert_match %r{t\.varchar_max\s+"my_varchar_max",\s+limit: 2147483647$}, output
-      assert_match %r{t\.text_basic\s+"my_text_basic",\s+limit: 2147483647$}, output
+      assert_match %r{t\.varchar_max\s+"my_varchar_max"$}, output
+      assert_match %r{t\.text_basic\s+"my_text_basic"$}, output
       assert_match %r{t\.nchar\s+"my_nchar",\s+limit: 1$}, output
-      assert_match %r{t\.ntext\s+"my_ntext",\s+limit: 2147483647$}, output
+      assert_match %r{t\.ntext\s+"my_ntext"$}, output
       assert_match %r{t\.binary_basic\s+"my_binary_basic",\s+limit: 1$}, output
       assert_match %r{t\.varbinary\s+"my_varbinary"$}, output
       assert_match %r{t\.uuid\s+"my_uuid"$}, output
