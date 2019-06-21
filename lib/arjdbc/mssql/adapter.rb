@@ -3,7 +3,6 @@
 ArJdbc.load_java_part :MSSQL
 
 require 'arel'
-require 'arel/visitors/bind_visitor'
 require 'arel/visitors/sqlserver'
 require 'active_record/connection_adapters/abstract_adapter'
 
