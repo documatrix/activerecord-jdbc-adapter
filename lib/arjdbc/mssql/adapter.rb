@@ -189,14 +189,12 @@ module ActiveRecord
       # get the collation per column basis. At the moment we only use
       # the global database collation
       def case_sensitive_comparison(table, attribute, column, value)
-        if value.nil?
-          table[attribute].eq(value)
-        elsif [:string, :text].include?(column.type) && collation && !collation.match(/_CS/)
-          table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
+        if [:string, :text].include?(column.type) && collation && !collation.match(/_CS/)
+          table[attribute].eq(Arel::Nodes::Bin.new(value))
         # elsif value.acts_like?(:string)
         #   table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
         else
-          table[attribute].eq(Arel::Nodes::BindParam.new)
+          super
         end
       end
 
