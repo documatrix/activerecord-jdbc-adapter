@@ -47,7 +47,7 @@ class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
     assert_equal 2147483647,       column.limit
     assert_equal nil,              column.default
 
-    type = TestBinary.connection.lookup_cast_type(column.sql_type)
+    type = TestBinary.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::VarbinaryMax, type
   end
 
@@ -60,7 +60,7 @@ class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
     assert_equal 2147483647,       column.limit
     assert_equal nil,              column.default
 
-    type = TestBinary.connection.lookup_cast_type(column.sql_type)
+    type = TestBinary.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::VarbinaryMax, type
   end
 
@@ -73,7 +73,7 @@ class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
     assert_equal 1,             column.limit
     assert_equal nil,           column.default
 
-    type = TestBinary.connection.lookup_cast_type(column.sql_type)
+    type = TestBinary.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::BinaryBasic, type
   end
 
@@ -86,7 +86,7 @@ class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
     assert_equal 200,           column.limit
     assert_equal nil,           column.default
 
-    type = TestBinary.connection.lookup_cast_type(column.sql_type)
+    type = TestBinary.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::BinaryBasic, type
   end
 
@@ -99,7 +99,7 @@ class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
     assert_equal 8000,              column.limit
     assert_equal nil,               column.default
 
-    type = TestBinary.connection.lookup_cast_type(column.sql_type)
+    type = TestBinary.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Varbinary, type
   end
 
@@ -112,7 +112,7 @@ class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
     assert_equal 666,              column.limit
     assert_equal nil,              column.default
 
-    type = TestBinary.connection.lookup_cast_type(column.sql_type)
+    type = TestBinary.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Varbinary, type
   end
 
@@ -126,7 +126,7 @@ class MSSQLColumnBinaryTypeTest < Test::Unit::TestCase
   private
 
   def assert_cast_type(type, sql_type)
-    cast_type = TestBinary.connection.lookup_cast_type(sql_type)
+    cast_type = TestBinary.connection.send(:type_map).lookup(sql_type)
     assert_equal type, cast_type.type
   end
 end

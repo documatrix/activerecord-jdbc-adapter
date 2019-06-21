@@ -48,7 +48,7 @@ class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
     assert_equal nil,    column.precision
     assert_equal nil,    column.scale
 
-    type = ApproxNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ApproxNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Real, type
   end
 
@@ -62,7 +62,7 @@ class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
     assert_equal nil,           column.precision
     assert_equal nil,           column.scale
 
-    type = ApproxNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ApproxNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Real, type
   end
 
@@ -76,7 +76,7 @@ class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
     assert_equal nil,     column.precision
     assert_equal nil,     column.scale
 
-    type = ApproxNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ApproxNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Float, type
   end
 
@@ -90,7 +90,7 @@ class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
     assert_equal nil,           column.precision
     assert_equal nil,           column.scale
 
-    type = ApproxNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ApproxNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Float, type
   end
 
@@ -104,7 +104,7 @@ class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
     assert_equal nil,    column.precision
     assert_equal nil,    column.scale
 
-    type = ApproxNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ApproxNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Real, type
   end
 
@@ -118,7 +118,7 @@ class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
     assert_equal nil,     column.precision
     assert_equal nil,     column.scale
 
-    type = ApproxNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ApproxNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Float, type
   end
 
@@ -132,7 +132,7 @@ class MSSQLColumnApproxNumericTypesTest < Test::Unit::TestCase
   private
 
   def assert_cast_type(type, sql_type)
-    cast_type = ApproxNumericTypes.connection.lookup_cast_type(sql_type)
+    cast_type = ApproxNumericTypes.connection.send(:type_map).lookup(sql_type)
     assert_equal type, cast_type.type
   end
 

@@ -43,7 +43,7 @@ class MSSQLColumnDateTimeTypesTest < Test::Unit::TestCase
     assert_equal 'datetime',      column.sql_type
     assert_equal nil,             column.default
 
-    type = DateTimeTypes.connection.lookup_cast_type(column.sql_type)
+    type = DateTimeTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::DateTime, type
   end
 
@@ -55,7 +55,7 @@ class MSSQLColumnDateTimeTypesTest < Test::Unit::TestCase
     assert_equal 'datetime',                column.sql_type
     assert_equal '2017-02-28 01:59:19.789', column.default
 
-    type = DateTimeTypes.connection.lookup_cast_type(column.sql_type)
+    type = DateTimeTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::DateTime, type
   end
 
@@ -67,7 +67,7 @@ class MSSQLColumnDateTimeTypesTest < Test::Unit::TestCase
     assert_equal 'smalldatetime', column.sql_type
     assert_equal nil,             column.default
 
-    type = DateTimeTypes.connection.lookup_cast_type(column.sql_type)
+    type = DateTimeTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::SmallDateTime, type
   end
 
@@ -79,7 +79,7 @@ class MSSQLColumnDateTimeTypesTest < Test::Unit::TestCase
     assert_equal 'smalldatetime',       column.sql_type
     assert_equal '2019-02-28 05:59:06', column.default
 
-    type = DateTimeTypes.connection.lookup_cast_type(column.sql_type)
+    type = DateTimeTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::SmallDateTime, type
   end
 
@@ -196,7 +196,7 @@ class MSSQLColumnDateTimeTypesTest < Test::Unit::TestCase
   private
 
   def assert_cast_type(type, sql_type)
-    cast_type = DateTimeTypes.connection.lookup_cast_type(sql_type)
+    cast_type = DateTimeTypes.connection.send(:type_map).lookup(sql_type)
     assert_equal type, cast_type.type
   end
 

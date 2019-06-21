@@ -41,7 +41,7 @@ class MSSQLColumnDateTime2TypesTest < Test::Unit::TestCase
     assert_equal nil,            column.precision
     assert_equal nil,            column.default
 
-    type = DateTime2Types.connection.lookup_cast_type(column.sql_type)
+    type = DateTime2Types.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::DateTime2, type
   end
 
@@ -54,7 +54,7 @@ class MSSQLColumnDateTime2TypesTest < Test::Unit::TestCase
     assert_equal 0,              column.precision
     assert_equal nil,            column.default
 
-    type = DateTime2Types.connection.lookup_cast_type(column.sql_type)
+    type = DateTime2Types.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::DateTime2, type
   end
 
@@ -162,7 +162,7 @@ class MSSQLColumnDateTime2TypesTest < Test::Unit::TestCase
   private
 
   def assert_cast_type(type, sql_type)
-    cast_type = DateTime2Types.connection.lookup_cast_type(sql_type)
+    cast_type = DateTime2Types.connection.send(:type_map).lookup(sql_type)
     assert_equal type, cast_type.type
   end
 

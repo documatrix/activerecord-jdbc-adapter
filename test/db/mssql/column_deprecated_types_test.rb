@@ -45,7 +45,7 @@ class MSSQLColumnDeprecatedTypeTest < Test::Unit::TestCase
     assert_equal 2_147_483_647, column.limit
     assert_equal nil,           column.default
 
-    type = TestDeprecated.connection.lookup_cast_type(column.sql_type)
+    type = TestDeprecated.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Text, type
   end
 
@@ -58,7 +58,7 @@ class MSSQLColumnDeprecatedTypeTest < Test::Unit::TestCase
     assert_equal 2_147_483_647, column.limit
     assert_equal 'old text',    column.default
 
-    type = TestDeprecated.connection.lookup_cast_type(column.sql_type)
+    type = TestDeprecated.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Text, type
   end
 
@@ -71,7 +71,7 @@ class MSSQLColumnDeprecatedTypeTest < Test::Unit::TestCase
     assert_equal 2_147_483_647, column.limit
     assert_equal nil,           column.default
 
-    type = TestDeprecated.connection.lookup_cast_type(column.sql_type)
+    type = TestDeprecated.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Ntext, type
   end
 
@@ -84,7 +84,7 @@ class MSSQLColumnDeprecatedTypeTest < Test::Unit::TestCase
     assert_equal 2_147_483_647, column.limit
     assert_equal 'old ntext',   column.default
 
-    type = TestDeprecated.connection.lookup_cast_type(column.sql_type)
+    type = TestDeprecated.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Ntext, type
   end
 
@@ -97,7 +97,7 @@ class MSSQLColumnDeprecatedTypeTest < Test::Unit::TestCase
     assert_equal 2147483647, column.limit
     assert_equal nil,        column.default
 
-    type = TestDeprecated.connection.lookup_cast_type(column.sql_type)
+    type = TestDeprecated.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Image, type
   end
 
@@ -110,7 +110,7 @@ class MSSQLColumnDeprecatedTypeTest < Test::Unit::TestCase
     assert_equal 2147483647, column.limit
     assert_equal nil,        column.default
 
-    type = TestDeprecated.connection.lookup_cast_type(column.sql_type)
+    type = TestDeprecated.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Image, type
   end
 

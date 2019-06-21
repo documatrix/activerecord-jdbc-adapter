@@ -49,7 +49,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
     assert_equal 'int identity', column.sql_type
     assert_equal 4,              column.limit
 
-    type = TestInt.connection.lookup_cast_type(column.sql_type)
+    type = TestInt.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Integer, type
   end
 
@@ -62,7 +62,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
     assert_equal 4,        column.limit
     assert_equal nil,      column.default
 
-    type = TestInt.connection.lookup_cast_type(column.sql_type)
+    type = TestInt.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Integer, type
   end
 
@@ -75,7 +75,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
     assert_equal 1,         column.limit
     assert_equal nil ,      column.default
 
-    type = TestInt.connection.lookup_cast_type(column.sql_type)
+    type = TestInt.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::TinyInteger, type
   end
 
@@ -88,7 +88,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
     assert_equal 2,          column.limit
     assert_equal nil ,       column.default
 
-    type = TestInt.connection.lookup_cast_type(column.sql_type)
+    type = TestInt.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::SmallInteger, type
   end
 
@@ -100,7 +100,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
     assert_equal 'bigint identity', column.sql_type
     assert_equal 8,                 column.limit
 
-    type = TestInt.connection.lookup_cast_type(column.sql_type)
+    type = TestInt.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::BigInteger, type
   end
 
@@ -113,7 +113,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
     assert_equal 8,        column.limit
     assert_equal nil ,     column.default
 
-    type = TestInt.connection.lookup_cast_type(column.sql_type)
+    type = TestInt.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::BigInteger, type
   end
 
@@ -126,7 +126,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
     assert_equal 8,        column.limit
     assert_equal nil,      column.default
 
-    type = TestInt.connection.lookup_cast_type(column.sql_type)
+    type = TestInt.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::BigInteger, type
   end
 
@@ -141,7 +141,7 @@ class MSSQLColumnIntegerTypeTest < Test::Unit::TestCase
   private
 
   def assert_cast_type(type, sql_type)
-    cast_type = TestInt.connection.lookup_cast_type(sql_type)
+    cast_type = TestInt.connection.send(:type_map).lookup(sql_type)
     assert_equal type, cast_type.type
   end
 end

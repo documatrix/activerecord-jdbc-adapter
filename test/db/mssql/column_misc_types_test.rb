@@ -43,7 +43,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
     assert_equal 'bit',    column.sql_type
     assert_equal nil,      column.default
 
-    type = MiscTypes.connection.lookup_cast_type(column.sql_type)
+    type = MiscTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Boolean, type
   end
 
@@ -55,7 +55,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
     assert_equal 'bit',    column.sql_type
     assert_equal '1',        column.default
 
-    type = MiscTypes.connection.lookup_cast_type(column.sql_type)
+    type = MiscTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Boolean, type
   end
 
@@ -67,7 +67,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
     assert_equal 'bit',    column.sql_type
     assert_equal '0',      column.default
 
-    type = MiscTypes.connection.lookup_cast_type(column.sql_type)
+    type = MiscTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Boolean, type
   end
 
@@ -80,7 +80,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
     assert_equal 'xml', column.sql_type
     assert_equal nil,   column.default
 
-    type = MiscTypes.connection.lookup_cast_type(column.sql_type)
+    type = MiscTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::XML, type
   end
 
@@ -92,7 +92,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
     assert_equal 'xml',   column.sql_type
     assert_equal 'hello', column.default
 
-    type = MiscTypes.connection.lookup_cast_type(column.sql_type)
+    type = MiscTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::XML, type
   end
 
@@ -104,7 +104,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
     assert_equal 'uniqueidentifier', column.sql_type
     assert_equal nil,                column.default
 
-    type = MiscTypes.connection.lookup_cast_type(column.sql_type)
+    type = MiscTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::UUID, type
   end
 
@@ -116,7 +116,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
     assert_equal 'uniqueidentifier', column.sql_type
     assert_equal 'hi',               column.default
 
-    type = MiscTypes.connection.lookup_cast_type(column.sql_type)
+    type = MiscTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::UUID, type
   end
 
@@ -130,7 +130,7 @@ class MSSQLColumnMiscTypesTest < Test::Unit::TestCase
   private
 
   def assert_cast_type(type, sql_type)
-    cast_type = MiscTypes.connection.lookup_cast_type(sql_type)
+    cast_type = MiscTypes.connection.send(:type_map).lookup(sql_type)
     assert_equal type, cast_type.type
   end
 end

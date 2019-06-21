@@ -61,7 +61,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal nil,              column.limit
     assert_equal nil,              column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Nvarchar, type
   end
 
@@ -74,7 +74,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 34,               column.limit
     assert_equal "in\nand\n\nout", column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Nvarchar, type
   end
 
@@ -87,7 +87,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 2_147_483_647,   column.limit
     assert_equal nil,             column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::NvarcharMax, type
   end
 
@@ -100,7 +100,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 2_147_483_647,   column.limit
     assert_equal 'Hello there',   column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::NvarcharMax, type
   end
 
@@ -113,7 +113,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 1,          column.limit
     assert_equal nil,        column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Nchar, type
   end
 
@@ -126,7 +126,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 3,          column.limit
     assert_equal 'NSW',      column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Nchar, type
   end
 
@@ -139,7 +139,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 4,          column.limit
     assert_equal '2007',     column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Nchar, type
   end
 
@@ -152,7 +152,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 1,         column.limit
     assert_equal nil,       column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Char, type
   end
 
@@ -165,7 +165,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 3,         column.limit
     assert_equal 'VIC',     column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Char, type
   end
 
@@ -178,7 +178,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 4,         column.limit
     assert_equal '3006',    column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Char, type
   end
 
@@ -191,7 +191,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 8000,            column.limit
     assert_equal nil,            column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Varchar, type
   end
 
@@ -204,7 +204,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 711,                column.limit
     assert_equal 'South Melbourne', column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Varchar, type
   end
 
@@ -217,7 +217,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 11,            column.limit
     assert_equal 'Melbourne',   column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Varchar, type
   end
 
@@ -230,7 +230,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal 2147483647,     column.limit
     assert_equal 'Southbank',    column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::VarcharMax, type
   end
 
@@ -243,7 +243,7 @@ class MSSQLColumnStringTypeTest < Test::Unit::TestCase
     assert_equal  2147483647,    column.limit
     assert_equal 'South Yarra',  column.default
 
-    type = TestString.connection.lookup_cast_type(column.sql_type)
+    type = TestString.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::VarcharMax, type
   end
 
