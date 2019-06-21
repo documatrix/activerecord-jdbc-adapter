@@ -276,7 +276,7 @@ module ActiveRecord
       # This method is called indirectly by the abstract method
       # 'fetch_type_metadata' which then it is called by the java part when
       # calculating a table's columns.
-      def initialize_type_map(map)
+      def initialize_type_map(map = type_map)
         # Build the type mapping from SQL Server to ActiveRecord
 
         # Integer types.
