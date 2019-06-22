@@ -26,6 +26,7 @@ require 'arjdbc/mssql/explain_support'
 require 'arjdbc/mssql/transaction'
 require 'arjdbc/mssql/errors'
 require 'arjdbc/mssql/schema_creation'
+require 'arjdbc/mssql/database_limits'
 
 module ActiveRecord
   module ConnectionAdapters
@@ -56,6 +57,7 @@ module ActiveRecord
       include MSSQL::ColumnDumper
       include MSSQL::DatabaseStatements
       include MSSQL::ExplainSupport
+      include MSSQL::DatabaseLimits
 
       @cs_equality_operator = 'COLLATE Latin1_General_CS_AS_WS'
 
