@@ -40,7 +40,7 @@ class MSSQLFinderAndAssociationTest < Test::Unit::TestCase
       end
 
       create_table :reviews do |t|
-        t.references :stories, foreign_key: true
+        t.references :story, foreign_key: true
         t.integer :rate, limit: 2
         t.string :reviewer, limit: 150
         t.text :content
@@ -88,6 +88,11 @@ class MSSQLFinderAndAssociationTest < Test::Unit::TestCase
   def self.shutdown
     CreateSimpleSchema.down
     ActiveRecord::Base.clear_active_connections!
+  end
+
+  def test_find_with_eager_loading_collection_and_ordering_by_collection_primary_key
+    assert_equal Writer.first, Writer.eager_load(stories: :reviews).
+      order("writers.id, reviews.id, stories.id").first
   end
 
   def test_select_with_order_in_different_table
