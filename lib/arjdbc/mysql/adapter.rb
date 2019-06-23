@@ -65,6 +65,10 @@ module ActiveRecord
         true
       end
 
+      def supports_set_server_option?
+        false
+      end
+
       # HELPER METHODS ===========================================
 
       # Reloading the type map in abstract/statement_cache.rb blows up postgres
@@ -88,10 +92,6 @@ module ActiveRecord
 
       def error_number(exception)
         exception.error_code if exception.is_a?(JDBCError)
-      end
-
-      def create_table(table_name, **options) #:nodoc:
-        super(table_name, options: "ENGINE=InnoDB", **options)
       end
 
       #--
@@ -146,6 +146,22 @@ module ActiveRecord
         ::ActiveRecord::ConnectionAdapters::MySQL::Column
       end
 
+      # defined in MySQL::DatabaseStatements which is not included
+      def default_insert_value(column)
+        Arel.sql("DEFAULT") unless column.auto_increment?
+      end
+
+      # FIXME: optimize insert_fixtures_set by using JDBC Statement.addBatch()/executeBatch()
+      def combine_multi_statements(total_sql)
+        total_sql
+      end
+
+      def with_multi_statements
+        yield
+      end
+
+      def discard_remaining_results
+      end
     end
   end
 end

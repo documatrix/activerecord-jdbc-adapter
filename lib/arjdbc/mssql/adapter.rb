@@ -3,7 +3,6 @@
 ArJdbc.load_java_part :MSSQL
 
 require 'arel'
-require 'arel/visitors/bind_visitor'
 require 'arel/visitors/sqlserver'
 require 'active_record/connection_adapters/abstract_adapter'
 
@@ -27,6 +26,7 @@ require 'arjdbc/mssql/explain_support'
 require 'arjdbc/mssql/transaction'
 require 'arjdbc/mssql/errors'
 require 'arjdbc/mssql/schema_creation'
+require 'arjdbc/mssql/database_limits'
 
 module ActiveRecord
   module ConnectionAdapters
@@ -54,9 +54,9 @@ module ActiveRecord
 
       include MSSQL::Quoting
       include MSSQL::SchemaStatements
-      include MSSQL::ColumnDumper
       include MSSQL::DatabaseStatements
       include MSSQL::ExplainSupport
+      include MSSQL::DatabaseLimits
 
       @cs_equality_operator = 'COLLATE Latin1_General_CS_AS_WS'
 
@@ -190,14 +190,12 @@ module ActiveRecord
       # get the collation per column basis. At the moment we only use
       # the global database collation
       def case_sensitive_comparison(table, attribute, column, value)
-        if value.nil?
-          table[attribute].eq(value)
-        elsif [:string, :text].include?(column.type) && collation && !collation.match(/_CS/)
-          table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
+        if [:string, :text].include?(column.type) && collation && !collation.match(/_CS/)
+          table[attribute].eq(Arel::Nodes::Bin.new(value))
         # elsif value.acts_like?(:string)
         #   table[attribute].eq(Arel::Nodes::Bin.new(Arel::Nodes::BindParam.new))
         else
-          table[attribute].eq(Arel::Nodes::BindParam.new)
+          super
         end
       end
 
@@ -277,7 +275,7 @@ module ActiveRecord
       # This method is called indirectly by the abstract method
       # 'fetch_type_metadata' which then it is called by the java part when
       # calculating a table's columns.
-      def initialize_type_map(map)
+      def initialize_type_map(map = type_map)
         # Build the type mapping from SQL Server to ActiveRecord
 
         # Integer types.
@@ -346,6 +344,9 @@ module ActiveRecord
         register_class_with_precision map, %r{\Adatetime2\(\d+\)}i, MSSQL::Type::DateTime2
         map.register_type 'datetime2(7)',  MSSQL::Type::DateTime2.new
 
+        # TODO: we should have identity separated from the sql_type
+        # let's say in another attribute (this will help to pass more AR tests),
+        # also we add collation attribute per column.
         # aliases
         map.alias_type 'int identity',    'int'
         map.alias_type 'bigint identity', 'bigint'

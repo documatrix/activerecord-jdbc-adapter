@@ -50,7 +50,7 @@ class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
     assert_equal 18,              column.precision
     assert_equal nil,             column.scale
 
-    type = ExactNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ExactNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::DecimalWithoutScale, type
   end
 
@@ -67,7 +67,7 @@ class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
     assert_equal 15,              column.precision
     assert_equal nil,             column.scale
 
-    type = ExactNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ExactNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::DecimalWithoutScale, type
   end
 
@@ -81,7 +81,7 @@ class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
     assert_equal 15,              column.precision
     assert_equal 2,               column.scale
 
-    type = ExactNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ExactNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Decimal, type
   end
 
@@ -95,7 +95,7 @@ class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
     assert_equal 10,              column.precision
     assert_equal 4,               column.scale
 
-    type = ExactNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ExactNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Decimal, type
   end
 
@@ -109,7 +109,7 @@ class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
     assert_equal 19,            column.precision
     assert_equal 4,             column.scale
 
-    type = ExactNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ExactNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Money, type
   end
 
@@ -123,7 +123,7 @@ class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
     assert_equal 10,            column.precision
     assert_equal 4,             column.scale
 
-    type = ExactNumericTypes.connection.lookup_cast_type(column.sql_type)
+    type = ExactNumericTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::SmallMoney, type
   end
 
@@ -139,7 +139,7 @@ class MSSQLColumnExactNumericTypesTest < Test::Unit::TestCase
   private
 
   def assert_cast_type(type, sql_type)
-    cast_type = ExactNumericTypes.connection.lookup_cast_type(sql_type)
+    cast_type = ExactNumericTypes.connection.send(:type_map).lookup(sql_type)
     assert_equal type, cast_type.type
   end
 end

@@ -2,6 +2,9 @@ module ActiveRecord
   module ConnectionAdapters
     module MSSQL
       module Quoting
+        QUOTED_TRUE  = '1'.freeze
+        QUOTED_FALSE = '0'.freeze
+
         # Quote date/time values for use in SQL input, includes microseconds
         # with three digits only if the value is a Time responding to usec.
         # The JDBC drivers does not work with 6 digits microseconds
@@ -29,17 +32,21 @@ module ActiveRecord
           cast_type = lookup_cast_type(column.sql_type)
           if cast_type.type == :uuid && value =~ /\(\)/
             value
+          elsif column.type == :datetime_basic && value.is_a?(String)
+            # let's trust the user to set a right default value for this
+            # legacy type something like: '2017-02-28 01:59:19.789'
+            quote(value)
           else
             super
           end
         end
 
         def quoted_true
-          1
+          QUOTED_TRUE
         end
 
         def quoted_false
-          0
+          QUOTED_FALSE
         end
 
         # @override

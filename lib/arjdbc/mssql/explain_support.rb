@@ -18,9 +18,14 @@ module ActiveRecord
         def explain(arel, binds = [])
           return if DISABLED
 
+          if arel.respond_to?(:to_sql)
+            raw_sql, raw_binds = to_sql_and_binds(arel, binds)
+          else
+            raw_sql, raw_binds = arel, binds
+          end
           # sql = to_sql(arel, binds)
           # result = with_showplan_on { exec_query(sql, 'EXPLAIN', binds) }
-           sql = interpolate_sql_statement(arel, binds)
+           sql = interpolate_sql_statement(raw_sql, raw_binds)
            result = with_showplan_on do
              exec_query(sql, 'EXPLAIN', [])
            end

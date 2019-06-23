@@ -1,4 +1,5 @@
-/***** BEGIN LICENSE BLOCK *****
+/*
+ ***** BEGIN LICENSE BLOCK *****
  * Copyright (c) 2012-2015 Karol Bucek <self@kares.org>
  * Copyright (c) 2006-2010 Nick Sieger <nick@nicksieger.com>
  * Copyright (c) 2006-2007 Ola Bini <ola.bini@gmail.com>
@@ -27,8 +28,8 @@ package arjdbc.postgresql;
 
 import arjdbc.jdbc.Callable;
 import arjdbc.jdbc.DriverWrapper;
-import arjdbc.postgresql.PostgreSQLResult;
 import arjdbc.util.DateTimeUtils;
+import arjdbc.util.PG;
 import arjdbc.util.StringHelper;
 
 import java.io.ByteArrayInputStream;
@@ -39,6 +40,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -50,8 +52,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.jruby.*;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.exceptions.RaiseException;
@@ -62,6 +62,7 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.util.ByteList;
 
+import org.jruby.util.TypeConverter;
 import org.postgresql.PGConnection;
 import org.postgresql.PGStatement;
 import org.postgresql.geometric.PGbox;
@@ -84,7 +85,7 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
     private static final Pattern doubleValuePattern = Pattern.compile("(-?\\d+(?:\\.\\d+)?)");
     private static final Pattern uuidPattern = Pattern.compile("\\{?\\p{XDigit}{4}(?:-?(\\p{XDigit}{4})){7}\\}?"); // Fuzzy match postgres's allowed formats
 
-    private static final Map<String, Integer> POSTGRES_JDBC_TYPE_FOR = new HashMap<String, Integer>(32, 1);
+    private static final Map<String, Integer> POSTGRES_JDBC_TYPE_FOR = new HashMap<>(32, 1);
     static {
         POSTGRES_JDBC_TYPE_FOR.put("bit", Types.OTHER);
         POSTGRES_JDBC_TYPE_FOR.put("bit_varying", Types.OTHER);
@@ -116,6 +117,7 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
     private static final Pattern pointCleanerPattern = Pattern.compile("\\.0\\b");
 
     private RubyClass resultClass;
+    private RubyHash typeMap = null;
 
     public PostgreSQLRubyJdbcConnection(Ruby runtime, RubyClass metaClass) {
         super(runtime, metaClass);
@@ -363,12 +365,26 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
         final int index, IRubyObject value,
         final IRubyObject attribute, final int type) throws SQLException {
 
+        if ( value instanceof RubyFloat ) {
+            final double doubleValue = ( (RubyFloat) value ).getValue();
+            if ( Double.isInfinite(doubleValue) ) {
+                setTimestampInfinity(statement, index, doubleValue);
+                return;
+            }
+        }
+
         if ( ! "Date".equals(value.getMetaClass().getName()) && value.respondsTo("to_date") ) {
             value = value.callMethod(context, "to_date");
         }
 
-        // NOTE: assuming Date#to_s does right ...
-        statement.setDate(index, Date.valueOf(value.toString()));
+        int year = RubyNumeric.num2int(value.callMethod(context, "year"));
+        int month = RubyNumeric.num2int(value.callMethod(context, "month"));
+        int day = RubyNumeric.num2int(value.callMethod(context, "day"));
+
+        @SuppressWarnings("deprecated")
+        Date date = new Date(year - 1900, month - 1, day);
+
+        statement.setDate(index, date);
     }
 
     @Override
@@ -469,6 +485,21 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
         }
     }
 
+    protected IRubyObject jdbcToRuby(ThreadContext context, Ruby runtime, int column, int type, ResultSet resultSet) throws SQLException {
+        return typeMap != null ?
+                convertWithTypeMap(context, runtime, column, type, resultSet) :
+                super.jdbcToRuby(context, runtime, column, type, resultSet);
+    }
+
+    private IRubyObject convertWithTypeMap(ThreadContext context, Ruby runtime, int column, int type, ResultSet resultSet) throws SQLException {
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        IRubyObject decoder = typeMap.op_aref(context, STRING_CACHE.get(context, metaData.getColumnTypeName(column)));
+
+        if (decoder.isNil()) return super.jdbcToRuby(context, runtime, column, type, resultSet);
+
+        return decoder.callMethod(context, "decode", StringHelper.newDefaultInternalString(runtime, resultSet.getString(column)));
+    }
+
     // The tests won't start if this returns PGpoint[]
     // it fails with a runtime error: "NativeException: java.lang.reflect.InvocationTargetException: [Lorg/postgresql/geometric/PGpoint"
     private Object[] convertToPoints(Double[] values) throws SQLException {
@@ -515,7 +546,9 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
         final PreparedStatement statement, final int index,
         final IRubyObject value, final String columnType) throws SQLException {
 
-        final String rangeValue = value.toString();
+        // As of AR 5.2 this is a Range object, I defer to the adapter for encoding because of the edge cases
+        // of dealing with the specific types in the range
+        final String rangeValue = adapter(context).callMethod(context, "encode_range", value).toString();
         final Object pgRange;
 
         switch ( columnType ) {
@@ -535,7 +568,7 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
                 pgRange = new Int8RangeType(rangeValue);
                 break;
             default:
-                pgRange = new NumRangeType(rangeValue);
+                pgRange = new NumRangeType(rangeValue, columnType);
         }
 
         statement.setObject(index, pgRange);
@@ -684,8 +717,16 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
     protected IRubyObject dateToRuby(ThreadContext context, Ruby runtime, ResultSet resultSet, int index) throws SQLException {
         // NOTE: PostgreSQL adapter under MRI using pg gem returns UTC-d Date/Time values
         final String value = resultSet.getString(index);
+        if (value == null) return context.nil;
 
-        return value == null ? context.nil : DateTimeUtils.parseDate(context, value, getDefaultTimeZone(context));
+        final int len = value.length();
+        if (len < 10 && value.charAt(len - 1) == 'y') { // infinity / -infinity
+            IRubyObject infinity = parseInfinity(context.runtime, value);
+
+            if (infinity != null) return infinity;
+        }
+
+        return DateTimeUtils.parseDate(context, value, getDefaultTimeZone(context));
     }
 
 
@@ -939,11 +980,27 @@ public class PostgreSQLRubyJdbcConnection extends arjdbc.jdbc.RubyJdbcConnection
             setType("numrange");
         }
 
-        public NumRangeType(final String value) throws SQLException {
-            this();
+        public NumRangeType(final String value, final String type) throws SQLException {
+            setType(type);
             setValue(value);
         }
 
     }
 
+    @PG @JRubyMethod
+    public IRubyObject escape_string(ThreadContext context, IRubyObject string) {
+        return PostgreSQLModule.quote_string(context, this, string);
+    }
+
+    @PG @JRubyMethod(name = "typemap=")
+    public IRubyObject typemap_set(ThreadContext context, IRubyObject mapArg) {
+        if (mapArg.isNil()) {
+            typeMap = null;
+            return context.nil;
+        }
+
+        TypeConverter.checkHashType(context.runtime, mapArg);
+        this.typeMap = (RubyHash) mapArg;
+        return mapArg;
+    }
 }

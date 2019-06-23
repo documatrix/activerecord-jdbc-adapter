@@ -28,6 +28,7 @@ config = {
 config[:username] = ENV['AR_USERNAME'] if ENV['AR_USERNAME']
 config[:password] = ENV['AR_PASSWORD'] if ENV['AR_PASSWORD']
 config[:database] = ENV['AR_DATABASE'] || 'arjdbc_test'
+config[:prepared_statements] = true
 
 if defined? JRUBY_VERSION
   puts "--- RUBY_VERSION: #{RUBY_VERSION} (JRUBY_VERSION: #{JRUBY_VERSION} #{ENV_JAVA['java.runtime.version']})"

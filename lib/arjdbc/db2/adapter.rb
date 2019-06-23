@@ -30,6 +30,65 @@ module ArJdbc
   # @note This adapter doesn't support explain `config.active_record.auto_explain_threshold_in_seconds` should be commented (Rails < 4.0)
   module DB2
 
+
+    module ActiveRecord::ConnectionAdapters
+
+      remove_const(:DB2Adapter) if const_defined?(:DB2Adapter)
+
+      class DB2Adapter < JdbcAdapter
+
+        include ArJdbc::DB2
+        include ArJdbc::DB2::Column
+
+        # AR 5.2 Fix
+        def initialize(connection, logger = nil, connection_parameters = nil, config = {})
+          super(connection, logger, config) # configure_connection happens in super
+        end
+
+        def jdbc_connection_class(spec)
+          ArJdbc::DB2.jdbc_connection_class
+        end
+
+        def data_source_sql(name = nil, type: nil)
+          scope = quoted_scope(name, type: type)
+
+          sql = if scope[:type] == "'T'"
+                  "select table_name from sysibm.tables".dup
+                else
+                  "select table_name from sysibm.views".dup
+                end
+
+          wheres = []
+
+          wheres << " table_type = #{scope[:type]}" if scope[:type]
+          wheres << " table_schema = #{scope[:schema]}" if scope[:schema]
+          wheres << " UPPER(table_name) = UPPER(#{scope[:name]})" if scope[:name]
+
+          if wheres.present?
+            sql << ' WHERE '
+            sql << wheres.join(' AND ')
+          end
+          sql
+        end
+
+        def quoted_scope(name = nil, type: nil)
+          type = \
+              case type
+              when "BASE TABLE"
+                "'T'"
+              when "VIEW"
+                "'V'"
+              end
+          scope = {}
+          scope[:name] = quote(name) if name
+          scope[:type] = type if type
+          scope[:schema] = quote(scope[:schema] || schema)
+          scope
+        end
+
+      end
+    end
+
     # @private
     def self.extended(adapter); initialize!; end
 
@@ -269,6 +328,17 @@ module ArJdbc
       select_one(sql).nil?
     end
 
+    # @override
+    def primary_keys(table)
+      # If no schema in table name is given but present in URL parameter. Use the URL parameter one
+      # This avoids issues if the table is present in multiple schemas
+      if table.split(".").size == 1 && schema
+        table = "#{schema}.#{table}"
+      end
+
+      super
+    end
+
     def next_sequence_value(sequence_name)
       select_value("SELECT NEXT VALUE FOR #{sequence_name} FROM sysibm.sysdummy1")
     end
@@ -378,9 +448,9 @@ module ArJdbc
       types
     end
 
-    def type_to_sql(type, limit = nil, precision = nil, scale = nil)
+    def type_to_sql(type, limit: nil, precision: nil, scale: nil, **)
       limit = nil if type.to_sym == :integer
-      super(type, limit, precision, scale)
+      super
     end
 
     # @private
@@ -393,7 +463,7 @@ module ArJdbc
 
     def add_column(table_name, column_name, type, options = {})
       # The keyword COLUMN allows to use reserved names for columns (ex: date)
-      add_column_sql = "ALTER TABLE #{quote_table_name(table_name)} ADD COLUMN #{quote_column_name(column_name)} #{type_to_sql(type, options[:limit], options[:precision], options[:scale])}"
+      add_column_sql = "ALTER TABLE #{quote_table_name(table_name)} ADD COLUMN #{quote_column_name(column_name)} #{type_to_sql(type, options)}"
       add_column_options!(add_column_sql, options)
       execute(add_column_sql)
     end
@@ -536,7 +606,7 @@ module ArJdbc
     end
 
     def change_column(table_name, column_name, type, options = {})
-      data_type = type_to_sql(type, options[:limit], options[:precision], options[:scale])
+      data_type = type_to_sql(type, options)
       sql = "ALTER TABLE #{table_name} ALTER COLUMN #{column_name} SET DATA TYPE #{data_type}"
       execute_table_change(sql, table_name, 'Change Column')
 
@@ -644,11 +714,10 @@ module ArJdbc
 
     # alias_method :execute_and_auto_confirm, :execute
 
-    # Returns the value of an identity column of the last *INSERT* statement
-    # made over this connection.
+    # Returns the value of an identity column of the last *INSERT* statement made over this connection.
     # @note Check the *IDENTITY_VAL_LOCAL* function for documentation.
-    # @return [Fixnum]
-    def last_insert_id
+    # @return [Integer, NilClass]
+    def last_inserted_id(result)
       @connection.identity_val_local
     end
 

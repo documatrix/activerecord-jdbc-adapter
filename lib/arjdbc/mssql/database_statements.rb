@@ -71,7 +71,47 @@ module ActiveRecord
           @connection.get_transaction_isolation
         end
 
+        def insert_fixtures_set(fixture_set, tables_to_delete = [])
+          fixture_inserts = []
+
+          fixture_set.each do |table_name, fixtures|
+            fixtures.each_slice(insert_rows_length) do |batch|
+              fixture_inserts << build_fixture_sql(batch, table_name)
+            end
+          end
+
+          table_deletes = tables_to_delete.map do |table|
+            "DELETE FROM #{quote_table_name(table)}".dup
+          end
+          total_sql = Array.wrap(combine_multi_statements(table_deletes + fixture_inserts))
+
+          disable_referential_integrity do
+            transaction(requires_new: true) do
+              total_sql.each do |sql|
+                execute sql, 'Fixtures Load'
+                yield if block_given?
+              end
+            end
+          end
+        end
+
         private
+
+        # Overrides method in abstract class, combining the sqls with semicolon
+        # affects disable_referential_integrity in mssql specially when multiple
+        # tables are involved.
+        def combine_multi_statements(total_sql)
+          total_sql
+        end
+
+        def default_insert_value(column)
+          if column.identity?
+            table_name = quote(quote_table_name(column.table_name))
+            Arel.sql("IDENT_CURRENT(#{table_name}) + IDENT_INCR(#{table_name})")
+          else
+            super
+          end
+        end
 
         def insert_sql?(sql)
           !(sql =~ /^\s*(INSERT|EXEC sp_executesql N'INSERT)/i).nil? 

@@ -25,7 +25,7 @@ module ActiveRecord
       module RealTransactionExt
         attr_reader :initial_transaction_isolation
 
-        def initialize(connection, options, run_commit_callbacks: false)
+        def initialize(connection, options, *args)
           @connection = connection
 
           if options[:isolation]
@@ -58,11 +58,11 @@ module ActiveRecord
     end
 
     class Transaction
-      include MSSQL::TransactionExt
+      prepend MSSQL::TransactionExt
     end
 
     class RealTransaction
-      include MSSQL::RealTransactionExt
+      prepend MSSQL::RealTransactionExt
     end
 
   end

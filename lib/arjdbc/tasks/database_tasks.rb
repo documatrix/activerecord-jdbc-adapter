@@ -9,6 +9,7 @@ module ArJdbc
     register_tasks(/mariadb/, ActiveRecord::Tasks::MySQLDatabaseTasks)
 
     require 'arjdbc/tasks/jdbc_database_tasks'
+    require 'arjdbc/tasks/sqlite_database_tasks_patch'
     require 'arjdbc/tasks/mssql_database_tasks'
     #require 'arjdbc/tasks/db2_database_tasks'
     #require 'arjdbc/tasks/derby_database_tasks'

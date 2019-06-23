@@ -2,7 +2,7 @@ require 'test_helper'
 require 'db/mssql'
 require 'active_record/fixtures'
 
-class MSSQLInsertFixturesTest < Test::Unit::TestCase
+class MSSQLFixturesTest < Test::Unit::TestCase
   class CreateFixtureEntries < ActiveRecord::Migration[5.1]
     def self.up
       create_table :fixture_entries do |t|
@@ -108,5 +108,82 @@ class MSSQLInsertFixturesTest < Test::Unit::TestCase
     fixtures_path = File.expand_path('fixtures', File.dirname(__FILE__))
 
     ActiveRecord::FixtureSet.create_fixtures(fixtures_path, 'legacy_timestamps')
+  end
+
+  def test_max_insert_rows_length
+    conn = FixtureEntry.connection
+
+    # This is a specific to mssql
+    assert_equal conn.send(:insert_rows_length), 1_000
+  end
+
+  def test_insert_fixture_set_auto_value_on_primary_key
+    fixtures = [
+      {
+        'code' => 'QWE',
+        'title' => 'my first entry',
+        'cookies' => true
+      },
+      {
+        'code' => 'RTY',
+        'title' => 'my second entry',
+        'cookies' => false
+      }
+    ]
+
+    conn = FixtureEntry.connection
+    assert_nothing_raised do
+      conn.insert_fixtures_set({ fixture_entries: fixtures }, ['fixture_entries'])
+    end
+  end
+
+  def test_insert_fixture_set_manual_primary_key
+    fixtures = {
+      'fixture_entries' => [
+        {
+          'id' => 711,
+          'code' => 'QWE',
+          'title' => 'my first',
+          'cookies' => true
+        },
+        {
+          'id' => 712,
+          'code' => 'RTY',
+          'title' => 'my second',
+          'cookies' => false
+        }
+      ]
+    }
+
+    conn = FixtureEntry.connection
+    assert_nothing_raised do
+      conn.insert_fixtures_set(fixtures, ['fixture_entries'])
+    end
+  end
+
+  def test_insert_fixtures_set_multiple_tables
+    fixtures = {
+      'fixture_entries' => [
+        {
+          'id' => 711,
+          'code' => 'QWE',
+          'title' => 'my first',
+          'cookies' => true
+        }
+      ],
+      'modern_timestamps' => [
+        {
+          'id' => 1,
+          'name' => 'awesome',
+          'created_on' => 2.days.ago.strftime('%Y-%m-%d %H:%M:%S.%9N Z'),
+          'updated_on' => 2.days.ago.strftime('%Y-%m-%d %H:%M:%S.%9N Z')
+        }
+      ]
+    }
+
+    conn = FixtureEntry.connection
+    assert_nothing_raised do
+      conn.insert_fixtures_set(fixtures, ['fixture_entries', 'modern_timestamps'])
+    end
   end
 end

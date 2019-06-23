@@ -88,12 +88,6 @@ module ArJdbc
         @extensions ||= super
       end
 
-      # @override
-      def lookup_cast_type(sql_type)
-        oid = execute("SELECT #{quote(sql_type)}::regtype::oid", "SCHEMA")
-        super oid.first['oid'].to_i
-      end
-
       def get_oid_type(oid, fmod, column_name, sql_type = '') # :nodoc:
         if !type_map.key?(oid)
           load_additional_types(type_map, oid)
@@ -120,7 +114,7 @@ module ArJdbc
 
       private
 
-      def initialize_type_map(m)
+      def initialize_type_map(m = type_map)
         register_class_with_limit m, 'int2', Type::Integer
         register_class_with_limit m, 'int4', Type::Integer
         register_class_with_limit m, 'int8', Type::Integer
@@ -136,13 +130,13 @@ module ArJdbc
         register_class_with_limit m, 'bit', OID::Bit
         register_class_with_limit m, 'varbit', OID::BitVarying
         m.alias_type 'timestamptz', 'timestamp'
-        m.register_type 'date', Type::Date.new
+        m.register_type 'date', OID::Date.new
 
         m.register_type 'money', OID::Money.new
         m.register_type 'bytea', OID::Bytea.new
         m.register_type 'point', OID::Point.new
         m.register_type 'hstore', OID::Hstore.new
-        m.register_type 'json', OID::Json.new
+        m.register_type 'json', Type::Json.new
         m.register_type 'jsonb', OID::Jsonb.new
         m.register_type 'cidr', OID::Cidr.new
         m.register_type 'inet', OID::Inet.new
@@ -228,7 +222,7 @@ module ArJdbc
             query += "WHERE t.typname = '%s' AND ns.nspname = ANY(current_schemas(true))" % oid
           end
         else
-          query += initializer.query_conditions_for_initial_load(type_map)
+          query += initializer.query_conditions_for_initial_load
         end
 
         records = execute(query, 'SCHEMA')
@@ -242,12 +236,13 @@ module ArJdbc
       ActiveRecord::Type.register(:bit_varying, OID::BitVarying, adapter: :postgresql)
       ActiveRecord::Type.register(:binary, OID::Bytea, adapter: :postgresql)
       ActiveRecord::Type.register(:cidr, OID::Cidr, adapter: :postgresql)
+      ActiveRecord::Type.register(:date, OID::Date, adapter: :postgresql)
       ActiveRecord::Type.register(:datetime, OID::DateTime, adapter: :postgresql)
       ActiveRecord::Type.register(:decimal, OID::Decimal, adapter: :postgresql)
       ActiveRecord::Type.register(:enum, OID::Enum, adapter: :postgresql)
       ActiveRecord::Type.register(:hstore, OID::Hstore, adapter: :postgresql)
       ActiveRecord::Type.register(:inet, OID::Inet, adapter: :postgresql)
-      ActiveRecord::Type.register(:json, OID::Json, adapter: :postgresql)
+      ActiveRecord::Type.register(:json, Type::Json, adapter: :postgresql)
       ActiveRecord::Type.register(:jsonb, OID::Jsonb, adapter: :postgresql)
       ActiveRecord::Type.register(:money, OID::Money, adapter: :postgresql)
       ActiveRecord::Type.register(:point, OID::Point, adapter: :postgresql)

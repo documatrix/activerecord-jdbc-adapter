@@ -8,6 +8,7 @@ require 'active_record/connection_adapters/postgresql/explain_pretty_printer'
 require 'active_record/connection_adapters/postgresql/quoting'
 require 'active_record/connection_adapters/postgresql/referential_integrity'
 require 'active_record/connection_adapters/postgresql/schema_creation'
+require 'active_record/connection_adapters/postgresql/schema_definitions'
 require 'active_record/connection_adapters/postgresql/schema_dumper'
 require 'active_record/connection_adapters/postgresql/schema_statements'
 require 'active_record/connection_adapters/postgresql/type_metadata'
@@ -31,9 +32,6 @@ module ArJdbc
     IndexDefinition = ::ActiveRecord::ConnectionAdapters::IndexDefinition
 
     # @private
-    ForeignKeyDefinition = ::ActiveRecord::ConnectionAdapters::ForeignKeyDefinition
-
-    # @private
     Type = ::ActiveRecord::Type
 
     # @see ActiveRecord::ConnectionAdapters::JdbcAdapter#jdbc_connection_class
@@ -50,7 +48,6 @@ module ArJdbc
       ADAPTER_NAME
     end
 
-    # TODO: Update this to pull info from the DatabaseMetaData object?
     def postgresql_version
       @postgresql_version ||=
         begin
@@ -247,6 +244,8 @@ module ArJdbc
 
     def supports_foreign_keys?; true end
 
+    def supports_validate_constraints?; true end
+
     def supports_index_sort_order?; true end
 
     def supports_partial_index?; true end
@@ -257,6 +256,8 @@ module ArJdbc
 
     def supports_views?; true end
 
+    def supports_bulk_alter?; true end    
+
     def supports_datetime_with_precision?; true end
 
     def supports_comments?; true end
@@ -265,6 +266,10 @@ module ArJdbc
     def supports_standard_conforming_strings?
       standard_conforming_strings?
       @standard_conforming_strings != :unsupported
+    end
+
+    def supports_foreign_tables? # we don't really support this yet, its a reminder :)
+      postgresql_version >= 90300
     end
 
     def supports_hex_escaped_bytea?
@@ -374,8 +379,8 @@ module ArJdbc
     end
 
     def explain(arel, binds = [])
-      sql = "EXPLAIN #{to_sql(arel, binds)}"
-      ActiveRecord::ConnectionAdapters::PostgreSQL::ExplainPrettyPrinter.new.pp(exec_query(sql, 'EXPLAIN', binds))
+      sql, binds = to_sql_and_binds(arel, binds)
+      ActiveRecord::ConnectionAdapters::PostgreSQL::ExplainPrettyPrinter.new.pp(exec_query("EXPLAIN #{sql}", 'EXPLAIN', binds))
     end
 
     # @note Only for "better" AR 4.0 compatibility.
@@ -435,10 +440,8 @@ module ArJdbc
 
     # Set the client message level.
     def client_min_messages=(level)
-      # NOTE: for now simply ignore the writer (no warn on Redshift) so that
-      # the AR copy-pasted PpstgreSQL parts stay the same as much as possible
-      return nil if redshift? # not supported on Redshift
-      execute("SET client_min_messages TO '#{level}'", 'SCHEMA')
+      # Not supported on Redshift
+      redshift? ? nil : super
     end
 
     # ORDER BY clause for the passed order option.
@@ -580,6 +583,10 @@ module ArJdbc
         ::ActiveRecord::SerializationFailure.new(message)
       when /deadlock detected/
         ::ActiveRecord::Deadlocked.new(message)
+      when /lock timeout/
+        ::ActiveRecord::LockWaitTimeout.new(message)
+      when /canceling statement/ # This needs to come after lock timeout because the lock timeout message also contains "canceling statement"
+        ::ActiveRecord::QueryCanceled.new(message)
       else
         super
       end
@@ -612,6 +619,10 @@ module ArJdbc
       @local_tz ||= execute('SHOW TIME ZONE', 'SCHEMA').first["TimeZone"]
     end
 
+    def bind_params_length
+      32767
+    end
+
   end
 end
 
@@ -627,7 +638,6 @@ module ActiveRecord::ConnectionAdapters
 
     # Try to use as much of the built in postgres logic as possible
     # maybe someday we can extend the actual adapter
-    include ActiveRecord::ConnectionAdapters::PostgreSQL::ColumnDumper
     include ActiveRecord::ConnectionAdapters::PostgreSQL::ReferentialIntegrity
     include ActiveRecord::ConnectionAdapters::PostgreSQL::SchemaStatements
     include ActiveRecord::ConnectionAdapters::PostgreSQL::Quoting
@@ -658,7 +668,8 @@ module ActiveRecord::ConnectionAdapters
 
       super(connection, logger, config) # configure_connection happens in super
 
-      initialize_type_map(@type_map = Type::HashLookupTypeMap.new)
+      @type_map = Type::HashLookupTypeMap.new
+      initialize_type_map
 
       @use_insert_returning = @config.key?(:insert_returning) ?
         self.class.type_cast_config_to_boolean(@config[:insert_returning]) : nil
@@ -679,14 +690,6 @@ module ActiveRecord::ConnectionAdapters
     end
 
     public :sql_for_insert
-
-    def schema_creation # :nodoc:
-      PostgreSQL::SchemaCreation.new self
-    end
-
-    def update_table_definition(table_name, base)
-      Table.new(table_name, base)
-    end
 
     def jdbc_connection_class(spec)
       ::ArJdbc::PostgreSQL.jdbc_connection_class
