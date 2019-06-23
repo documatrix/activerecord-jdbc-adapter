@@ -1,7 +1,7 @@
 module ActiveRecord
   module ConnectionAdapters
     module MSSQL
-      module ColumnDumper # :nodoc:
+      class SchemaDumper < ConnectionAdapters::SchemaDumper
         MSSQL_NO_LIMIT_TYPES = [
           'text',
           'ntext',

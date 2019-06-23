@@ -216,6 +216,10 @@ module ActiveRecord
           [super, *order_columns].join(', ')
         end
 
+        def create_schema_dumper(options)
+          MSSQL::SchemaDumper.create(self, options)
+        end
+
         def rename_column(table_name, column_name, new_column_name)
           # The below line checks if column exists otherwise raise activerecord
           # default exception for this case.

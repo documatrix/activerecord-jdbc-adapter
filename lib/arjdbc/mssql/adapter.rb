@@ -54,7 +54,6 @@ module ActiveRecord
 
       include MSSQL::Quoting
       include MSSQL::SchemaStatements
-      include MSSQL::ColumnDumper
       include MSSQL::DatabaseStatements
       include MSSQL::ExplainSupport
       include MSSQL::DatabaseLimits
