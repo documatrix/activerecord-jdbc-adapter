@@ -48,7 +48,11 @@ module ActiveRecord
         def columns(table_name)
           @connection.columns(table_name)
         rescue => e
-          raise translate_exception_class(e, nil)
+          # raise translate_exception_class(e, nil)
+          # FIXME: this breaks one arjdbc test but fixes activerecord tests
+          # (table name alias). Also it behaves similarly to the CRuby adapter
+          # which returns an empty array too. (postgres throws a exception)
+          []
         end
 
         # Returns an array of indexes for the given table.
