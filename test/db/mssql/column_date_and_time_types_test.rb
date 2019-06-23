@@ -79,7 +79,8 @@ class MSSQLColumnDateAndTimeTypesTest < Test::Unit::TestCase
     assert_equal false,             column.null
     assert_equal 'time(3)',         column.sql_type
     assert_equal 3,                 column.precision
-    assert_equal '15:59:06.456789', column.default
+    # assert_equal '15:59:06.456789', column.default
+    assert_equal '15:59:06.456000', column.default
 
     type = DateAndTimeTypes.connection.send(:type_map).lookup(column.sql_type)
     assert_instance_of Type::Time, type
