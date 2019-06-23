@@ -66,6 +66,7 @@ ArJdbc::ConnectionMethods.module_eval do
       url << ( config[:port] ? ":#{config[:port]};" : ';' )
       url << "databaseName=#{config[:database]};" if config[:database]
       url << "instanceName=#{config[:instance]};" if config[:instance]
+      url << "sendTimeAsDatetime=#{config[:send_time_as_datetime] || false};"
       app = config[:appname] || config[:application]
       url << "applicationName=#{app};" if app
       isc = config[:integrated_security] # Win only - needs sqljdbc_auth.dll

@@ -34,6 +34,8 @@ class MSSQLFinderAndAssociationTest < Test::Unit::TestCase
         t.integer :likes
         t.integer :dislikes
         t.datetime :written_on
+        t.time     :bonus_time
+        t.date     :last_read
         t.text :content
 
         t.timestamps null: true
@@ -93,6 +95,27 @@ class MSSQLFinderAndAssociationTest < Test::Unit::TestCase
   def test_find_with_eager_loading_collection_and_ordering_by_collection_primary_key
     assert_equal Writer.first, Writer.eager_load(stories: :reviews).
       order("writers.id, reviews.id, stories.id").first
+  end
+
+  def test_where_with_invalid_value
+    author = Writer.find_by(email: 'jesse@melbourne')
+    category = Category.find_by(name: 'scifi')
+
+    assert_nothing_raised  do
+      story = Story.create!(
+        title: 'Jupiter ascending ...',
+        writer_id: author.id,
+        category_id: category.id,
+        written_on: nil,
+        bonus_time: nil,
+        last_read: nil
+      )
+    end
+
+    assert_empty Story.where(writer_id: Object.new)
+    assert_empty Story.where(written_on: '')
+    assert_empty Story.where(bonus_time: '')
+    assert_empty Story.where(last_read: '')
   end
 
   def test_select_with_order_in_different_table
