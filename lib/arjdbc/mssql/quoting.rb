@@ -32,6 +32,10 @@ module ActiveRecord
           cast_type = lookup_cast_type(column.sql_type)
           if cast_type.type == :uuid && value =~ /\(\)/
             value
+          elsif column.type == :datetime_basic && value.is_a?(String)
+            # let's trust the user to set a right default value for this
+            # legacy type something like: '2017-02-28 01:59:19.789'
+            quote(value)
           else
             super
           end
