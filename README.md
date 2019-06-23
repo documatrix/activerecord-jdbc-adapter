@@ -6,13 +6,16 @@ supported by the original adapter such as PostgreSQL but it is advised to
 use the [original adapter](https://github.com/jruby/active)
 
 This adapter only works with JRuby and it is advised to install the latest
-stable versins of Rails
+stable versions of Rails
 
 - For Rails `5.0.7.2` install the `50.3.1` version of this adapter
 - For Rails `5.1.7` install the `51.3.0` version of this adapter
+- For Rails `5.2.3` install the `52.2.0` version of this adapter
 
-Support for Rails 5.2 is planned in the near future.
+Support for Rails 6.0 is planned in the future.
 
+This adapter passes most of the Rails tests (ActiveRecord tests) with the
+exception of some test that are not compatible with the SQL Server
 
 ### How to use it:
 
@@ -99,7 +102,7 @@ production:
 ```
 
 
-### WARNING
+### NOTE
 
 Keep one eye in the Rails connection pool, we have not thoroughly tested that
 part since we don't use the default Rails connection pool, other than that

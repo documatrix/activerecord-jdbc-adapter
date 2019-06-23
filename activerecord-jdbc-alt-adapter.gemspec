@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
     "as well as adapters for popular databases such as Oracle, SQLServer, " <<
     "DB2, FireBird and even Java (embed) databases: Derby, HSQLDB and H2. " <<
     "It allows to connect to virtually any JDBC-compliant database with your " <<
-    "JRuby on Rails application. This fork supports SQL Server/Azure SQL."
+    "JRuby on Rails application."
 
   gem.require_paths = ["lib"]
 
@@ -46,7 +46,7 @@ Gem::Specification.new do |gem|
   gem.executables = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }
   gem.test_files = gem.files.grep(%r{^test/})
 
-  gem.add_dependency 'activerecord', '~> 5.1.0', '>= 5.1.7'
+  gem.add_dependency 'activerecord', '~> 5.2.0', '>= 5.2.3'
 
   #gem.add_development_dependency 'test-unit', '2.5.4'
   #gem.add_development_dependency 'test-unit-context', '>= 0.3.0'
