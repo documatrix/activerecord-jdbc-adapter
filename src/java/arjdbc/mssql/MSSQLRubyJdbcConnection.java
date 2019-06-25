@@ -36,6 +36,7 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Locale;
 
@@ -303,6 +304,21 @@ public class MSSQLRubyJdbcConnection extends RubyJdbcConnection {
         final IRubyObject attribute, final int type) throws SQLException {
         String timeStr = DateTimeUtils.timeString(context, value, getDefaultTimeZone(context), true);
         statement.setObject(index, timeStr, Types.NVARCHAR);
+    }
+
+    @Override
+    protected void setDateParameter(final ThreadContext context,
+        final Connection connection, final PreparedStatement statement,
+        final int index, IRubyObject value,
+        final IRubyObject attribute, final int type) throws SQLException {
+
+      if ( ! "Date".equals(value.getMetaClass().getName()) && value.respondsTo("to_date") ) {
+        value = value.callMethod(context, "to_date");
+      }
+
+      // NOTE: Here we relay in ActiveRecord (ActiveSupport) to get
+      // the date as a string in the database format.
+      statement.setDate(index, Date.valueOf(value.callMethod(context, "to_s", context.runtime.newSymbol("db")).toString()));
     }
 
     // Overrides the method in parent, we only remove the savepoint
