@@ -100,6 +100,11 @@ module ActiveRecord
         true
       end
 
+      # Also known as filtered index
+      def supports_partial_index?
+        true
+      end
+
       # Does this adapter support views?
       def supports_views?
         true
