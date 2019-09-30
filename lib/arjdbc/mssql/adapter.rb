@@ -85,6 +85,12 @@ module ActiveRecord
         ::ActiveRecord::ConnectionAdapters::MSSQLColumn
       end
 
+      # Does this adapter support DDL rollbacks in transactions? That is, would
+      # CREATE TABLE or ALTER TABLE get rolled back by a transaction?
+      def supports_ddl_transactions?
+        true
+      end
+
       # Does this adapter support creating foreign key constraints?
       def supports_foreign_keys?
         true
@@ -97,6 +103,16 @@ module ActiveRecord
 
       # The MSSQL datetime type doe have precision.
       def supports_datetime_with_precision?
+        true
+      end
+
+      # Does this adapter support index sort order?
+      def supports_index_sort_order?
+        true
+      end
+
+      # Also known as filtered index
+      def supports_partial_index?
         true
       end
 
