@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.license = 'BSD-2-Clause'
   gem.summary = 'ActiveRecord JDBC adapter, for use within JRuby on Rails and SQL Server'
   gem.description = "" <<
-    "Fork of the ActiveRecord JDBC adapter with support for SQL Server/Azure SQL,"
+    "Fork of the ActiveRecord JDBC adapter with support for SQL Server and Azure SQL,"
     "AR-JDBC is a database adapter for Rails' ActiveRecord component designed " <<
     "to be used with JRuby built upon Java's JDBC API for database access. " <<
     "Provides (ActiveRecord) built-in adapters: MySQL, PostgreSQL and SQLite3 " <<
